@@ -1,0 +1,6 @@
+
+Execute on mccoy only! Network paths do not seem to work for some reasons.
+
+```{r}
+# system("`npm bin`/decktape /home/patrick/PhD/doc/presentations/2017_12_Vitoria/2017_12_Vitoria.html /home/patrick/PhD/doc/presentations/2017_12_Vitoria/2017_12_Vitoria.pdf --no-sandbox")
+```

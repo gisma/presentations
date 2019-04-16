@@ -1,0 +1,615 @@
+---
+title: "R Package 'sperrorest'"
+subtitle: ".header-font[Parallelized spatial error estimation and permutation-based variable importance assessment for geospatial machine learning]"
+author: ".smalltitleheader[Patrick Schratz, Tobias Herrmann, Alexander Brenning, <br> GIScience group, University of Jena]"
+date: ".smalltitleheader[EGU Vienna, April 2017]"
+output:
+  xaringan::moon_reader:
+    css: "FSU-theme-4x3-egu-2017.css"
+    seal: true
+    lib_dir: libs
+    nature:
+      highlightStyle: dracula
+      highlightLines: true
+      ratio: '4:3'
+      countIncrementalSlides: false
+---
+
+```{r setup, include=FALSE}
+options(htmltools.dir.version = FALSE)
+pacman::p_load(magick, here, sperrorest)
+```
+
+layout: true
+
+background-image: url(../img/FSU/4-3/layout_4-3.png)
+background-size: cover
+---
+
+class: middle, center
+
+# Spatial cross-validation OR  
+# "Are my model accuracies to good to be true?"<sup>\*</sup>
+
+---
+
+### Spatial vs. non-spatial model performance assessment example (classification tree)
+
+
+<figure>
+    <img src='figs/boxplot-spatial-non-spatial.png' style="width: 83%; height: 50%"/>
+    <font size="2">
+    </font>
+</figure>
+
+---
+
+# If you are insterested in...
+
+* Which spatial partitioning (there are many!) method to use 
+
+--
+
+* Performing (spatial) CV in parallel using `parsperrorest()` 
+
+--
+
+* Getting more accurate performances of your spatial models
+
+--
+
+* Getting permutation-based variable importance information from CV
+
+--
+
+<br><br>
+.large[
+-> Visit my PICO at 'PICOA.2'
+]
+
+---
+
+### Some facts about the package:
+
+
+* Initial CRAN release: 2012 (v0.2-1)
+
+* Developed by [Alexander Brenning](http://www.geographie.uni-jena.de/Brenning.html)<sup>1</sup>
+
+.footnote[.small[
+[1] Brenning, A. (2012). Spatial cross-validation and bootstrap for the assessment of prediction rules in Remote Sensing: The R package sperrorest. *In 2012 IEEE International Geoscience and Remote Sensing Symposium (pp. 5372–5375)*. doi:[10.1109/IGARSS.2012.6352393](10.1109/IGARSS.2012.6352393)  
+]]
+
+* Purpose: Provide an interface for **spatial** error estimation (cross-validation) and variable importance in R
+
+<br>
+
+#### New v1.0.0 (March 2017)
+
+* Github repository: https://pat-s.github.io/sperrorest/index.html
+
+* Parallelized function `parsperrorest()`
+
+* Full changelog: https://github.com/pat-s/sperrorest/blob/master/NEWS.md
+
+---
+
+# Function `parsperrorest()`
+
+Two parallel modes (`par.mode = 1` OR `par.mode = 2`)
+
+#### Mode 1
+
+* apply-based (package `pbapply`), uses either `mclapply()` (Unix) or `parapply()` (Windows)
+
+* elapsed/remaining time output to console 
+
+* faster than 'Mode 2'
+
+#### Mode 2
+
+* foreach-based
+
+* provides repetition/fold console output like `sperrorest()` does
+
+* slower than 'Mode 1' 
+
+* somewhat more stable
+
+---
+
+### What is the purpose of the package?
+
+- `sperrorest` simplifies/enables (**spatial**) cross-validation (CV) of statistical- and machine learning models
+
+- The package provides a complete framework to
+    - set up (create training and test sets) -> `partition.*()`
+ 
+    - perform (run CV) -> `sperrorest()` and `parsperrorest()`
+   
+    - analyze (summarize) cross-validation runs `summary.*()`
+    
+---
+
+#### Why use cross-validation to assess model performance? 
+
+* Independent training and test data 
+
+* Every observation is used (at least) once for testing
+
+<br>
+
+<figure>
+    <img src='figs/cross-validation.png' style="width: 73%; height: 50%"/>
+    <font size="2">
+    </font>
+</figure>
+
+.small[
+img source: http://sebastianraschka.com/Articles/2014_intro_supervised_learning.html
+]
+
+---
+
+# Why is SPATIAL cross-validation important?
+
+* When dealing with any kind of spatial data, spatial autocorrelation is present (with a varying magnitude)
+
+* When doing a **non-spatial** cross-validation, usually a *random resampling* is applied. This resampling method assumes that the observations are independent. This is not the case for spatial data!
+
+* The predicted model performances will be overoptimistic if spatial autocorrelation between the training and test data exists.<sup>2</sup>
+
+.footnote[
+[2] Brenning, A. (2012). Spatial cross-validation and bootstrap for the assessment of prediction rules in Remote Sensing: The R package sperrorest. *In 2012 IEEE International Geoscience and Remote Sensing Symposium (pp. 5372–5375)*. doi:[10.1109/IGARSS.2012.6352393](10.1109/IGARSS.2012.6352393)  
+]
+
+---
+class: middle, center 
+
+
+### Every model *with spatial data* should be validated using spatial cross-validation to obtain unbiased<sup>3</sup> performance estimates!
+
+.footnote[.small[
+[3] bias reduced ;-)
+]]
+
+---
+
+## Spatial partitioning methods of sperrorest
+
+**`partition.kmeans()`**: Versatile approach based on k-means clustering of coordinates
+
+```{r, eval = FALSE}
+data(ecuador)
+resamp <- partition.kmeans(ecuador, nfold = 5, repetition = 1:1)
+plot(resamp, ecuador)
+```
+
+```{r echo = FALSE, eval = FALSE}
+data(ecuador)
+resamp <- partition.kmeans(ecuador, nfold = 5, repetition = 1:1)
+png(here("R/presentations/sperrorest-EGU2017/figs/partition-kmeans.png"), 
+    height = 4.38, width = 12.57, res = 300, units = "in")
+plot(resamp, ecuador)
+dev.off()
+
+# pdf(here("R/presentations/sperrorest-EGU2017/figs/partitions-kmeans.pdf"))
+# image_convert(image_read(here("R/presentations/sperrorest-EGU2017/figs/partition-kmeans.png")), "pdf")
+# dev.off()
+```
+
+<figure>
+    <img src='figs/partition-kmeans.png' style="width: 100%; height: 50%"/>
+    <font size="2">
+    </font>
+</figure>
+
+---
+
+## Spatial partitioning methods of sperrorest
+
+**`partition.factor.cv()`**: Partitioning at grouping level (here: fields)
+
+```{r, eval = FALSE}
+data(maipo)
+resamp <- partition.factor.cv(maipo, nfold = 5, repetition = 1:1, fac = "field")
+plot(resamp, maipo, coords = c("utmx","utmy"))
+```
+
+```{r echo = FALSE, eval = FALSE}
+data(maipo)
+resamp <- partition.factor.cv(maipo, nfold = 5, repetition = 1:1, fac = "field")
+png(here("R/presentations/sperrorest-EGU2017/figs/partition-factor.cv.png"), 
+    height = 4.38, width = 12.57, res = 300, units = "in")
+plot(resamp, maipo, coords = c("utmx","utmy"))
+dev.off()
+```
+
+<figure>
+    <img src='figs/partition-factor.cv.png' style="width: 100%; height: 50%"/>
+    <font size="2">
+    </font>
+</figure>
+
+---
+
+## Spatial partitioning methods of sperrorest
+
+**`partition.tiles()`**: Rectangular tile partitioning (here: 5x2 grid). **Non-equal train/test splits within folds!**
+
+```{r, eval = FALSE}
+data(ecuador)
+resamp <- partition.tiles(ecuador, nsplit = c(4,3), reassign = FALSE)
+plot(resamp, ecuador)
+```
+
+```{r echo = FALSE, eval = FALSE}
+data(ecuador)
+resamp <- partition.tiles(ecuador, nsplit = c(5,2), reassign = FALSE)
+png(here("R/presentations/sperrorest-EGU2017/figs/partition.tiles.png"), 
+    height = 4.38, width = 12.57, res = 300, units = "in")
+plot(resamp, ecuador)
+dev.off()
+```
+
+<figure>
+    <img src='figs/partition.tiles.png' style="width: 100%; height: 50%"/>
+    <font size="2">
+    </font>
+</figure>
+
+---
+
+## Spatial partitioning methods of sperrorest
+
+**`partition.disc()`**: Partitioning by circular test areas (with optional buffer)
+
+```{r, eval = FALSE}
+data(ecuador)
+resamp <- partition.disc(ecuador, radius = 200, buffer = 200, ndisc = 5, repetition = 1:1)
+plot(resamp, ecuador)
+```
+
+```{r echo = FALSE, eval = FALSE}
+data(ecuador)
+resamp <- partition.disc(ecuador, radius = 200, buffer = 200, ndisc = 5, repetition = 1:1)
+png(here("R/presentations/sperrorest-EGU2017/figs/partition.disc.png"), 
+    height = 4.38, width = 12.57, res = 300, units = "in")
+plot(resamp, ecuador)
+dev.off()
+```
+
+<figure>
+    <img src='figs/partition.disc.png' style="width: 100%; height: 50%"/>
+    <font size="2">
+    </font>
+</figure>
+
+---
+
+## Non-spatial partitioning methods of sperrorest
+
+**`partition.cv()`**: Random partitioning
+
+```{r, eval = FALSE}
+data(ecuador)
+resamp <- partition.cv(ecuador, nfold = 5, repetition = 1:1)
+plot(resamp, ecuador)
+```
+
+```{r echo = FALSE, eval = FALSE}
+data(ecuador)
+resamp <- partition.cv(ecuador, nfold = 5, repetition = 1:1)
+png(here("R/presentations/sperrorest-EGU2017/figs/partition.cv.png"), 
+    height = 4.38, width = 12.57, res = 300, units = "in")
+plot(resamp, ecuador)
+dev.off()
+```
+
+<figure>
+    <img src='figs/partition.cv.png' style="width: 100%; height: 50%"/>
+    <font size="2">
+    </font>
+</figure>
+
+---
+
+### More resampling methods
+
+#### Non-spatial
+
+* `partition.cv.strat()`: Similar to`partition.cv()`
+
+* `partition.loo()`: Leave-one-out partitioning
+
+#### Bootstrap based
+
+* `represampling.bootstrap()`
+
+* `represampling.disc.bootstrap()`
+
+* `represampling.factor.bootstrap()`
+
+* `represampling.kmeans.bootstrap()`
+
+* `represampling.tile.bootstrap()`
+
+.footnote[.small[
+\* or build your own resampling or partitioning function for cross-validation or bootstrap!
+]]
+
+---
+
+# Usage example (spatial vs. non-spatial)
+
+First we create a formula `fo`, fit our model `fit` and create a custom predict function `mypred.rpart` which will work with `sperrorest()`. 
+For most models you can use the generic `predict()` function. 
+
+In this example we are using classification trees from package `rpart` because they nicely reveal the overfitting of models in a non-spatial setting.
+
+```{r}
+data(ecuador) # Muenchow et al. (2012), see ?ecuador
+fo <- slides ~ dem + slope + hcurv + vcurv + log.carea + cslope
+
+# Example of a classification tree fitted to this data:
+library(rpart)
+ctrl <- rpart.control(cp = 0.005) # show the effects of overfitting
+fit <- rpart(fo, data = ecuador, control = ctrl)
+
+# custom predict function
+mypred.rpart <- function(object, newdata) predict(object, newdata)[, 2]
+```
+
+---
+# Usage example (spatial vs. non-spatial)
+
+.pull-left[
+
+**Non-spatial**
+
+.smaller-code-font55[
+```{r, eval = FALSE}
+# Non-spatial 100-repeated 10-fold cross-validation:
+parsperrorest(data = ecuador, formula = fo,
+              model.fun = rpart, 
+              model.args = list(control = ctrl),
+              pred.fun = mypred.rpart,
+              smp.fun = partition.cv, 
+              smp.args = list(repetition = 1:100, 
+                              nfold = 10),
+              importance = TRUE, imp.permutations = 100,
+              par.args = list(par.units = 4, 
+                              par.mode = 1)) -> nspres
+```
+]
+
+**smp.fun = partition.cv**
+]
+
+.pull-right[
+
+**Spatial**
+
+.smaller-code-font55[
+```{r, eval = FALSE}
+# Spatial 100-repeated 10-fold cross-validation:
+parsperrorest(data = ecuador, formula = fo,
+              model.fun = rpart, 
+              model.args = list(control = ctrl),
+              pred.fun = mypred.rpart,
+              smp.fun = partition.kmeans, 
+              smp.args = list(repetition = 1:100, 
+                              nfold = 10),
+              importance = TRUE, imp.permutations = 100,
+              par.args = list(par.units = 4, 
+                              par.mode = 1)) -> spres
+```
+]
+
+**smp.fun = partition.kmeans**
+]
+
+---
+
+# Usage example (spatial vs. non-spatial)
+
+```{r echo=FALSE, eval = T}
+nspres <- readRDS("~/Desktop/presentations/sperrorest-EGU2017/r-objects/nspres.rda")
+
+spres <- readRDS("~/Desktop/presentations/sperrorest-EGU2017/r-objects/spres.rda")
+```
+
+Compare both spatial and non-spatial error distributions of training and test sets. 
+
+We will use AUROC as the main error measure in this classification example. 
+
+```{r, eval = FALSE}
+smry <- data.frame(
+  nonspat.training = unlist(summary(nspres$error.rep, level = 1)$train.auroc),
+  nonspat.test     = unlist(summary(nspres$error.rep, level = 1)$test.auroc),
+  spatial.training = unlist(summary(spres$error.rep,  level = 1)$train.auroc),
+  spatial.test     = unlist(summary(spres$error.rep,  level = 1)$test.auroc))
+
+boxplot(smry, col = c('cyan','purple','cyan','purple'), 
+        main = 'Training vs. test, nonspatial vs. spatial',
+        ylab = 'Area under the ROC curve')
+```
+
+---
+
+
+```{r, echo = FALSE, eval = FALSE}
+smry <- data.frame(
+  nonspat.training = unlist(summary(nspres$error.rep, level = 1)$train.auroc),
+  nonspat.test     = unlist(summary(nspres$error.rep, level = 1)$test.auroc),
+  spatial.training = unlist(summary(spres$error.rep,  level = 1)$train.auroc),
+  spatial.test     = unlist(summary(spres$error.rep,  level = 1)$test.auroc))
+
+png(here("figs/boxplot-spatial-non-spatial.png"), 
+    height = 5.38, width = 6.5, res = 300, units = "in")
+boxplot(smry, col = c('cyan','purple','cyan','purple'), 
+        main = 'Training (cyan) vs. test (purple), nonspatial vs. spatial',
+        ylab = 'Area under the ROC curve')
+dev.off()
+```
+
+
+.pull-left-70[
+<br><br><br>
+<figure>
+    <img src='figs/boxplot-spatial-non-spatial.png' style="width: 100%; height: 100%"/>
+</figure>
+]
+
+<br><br><br><br>
+.pull-right-30[
+* Training-set AUROC much higher than cross-validation AUROC -> indicates overfitting
+
+* **Non-spatial** cross-validation not fully able to detect overfitting -> over-optimistic assessment of spatial prediction performance
+
+]
+
+---
+
+### Summary methods (Repetition level)
+
+.pull-left[
+
+**Non-spatial**
+
+.smaller-code-font50[
+```{r}
+summary(nspres$error.rep)
+```
+]
+]
+
+.pull-right[ 
+
+**Spatial**
+
+.smaller-code-font50[
+```{r}
+summary(spres$error.rep)
+```
+]
+]
+
+---
+
+### Permutation-based Variable Importance<sup>4</sup>
+
+.pull-left[
+
+**Non-spatial**
+
+.smaller-code-font50[
+```{r}
+summary(nspres$importance)[1:10]
+```
+]
+]
+
+.pull-right[ 
+
+**Spatial**
+
+.smaller-code-font50[
+```{r}
+summary(spres$importance)[1:10]
+```
+]
+]
+
+.footnote[.small[
+[4] Russ, Georg, and Alexander Brenning. 2010b. “Spatial Variable Importance Assessment for Yield Prediction in Precision Agriculture.” *In Lecture Notes in Computer Science, 184–95.* Springer Science + Business Media. doi:[10.1007/978-3-642-13062-5_18](10.1007/978-3-642-13062-5_18).
+]]
+
+---
+
+# Miscellaneous
+
+.pull-left[
+
+Other summaries:
+
+* Fold-level error -> `summary(object$error.fold)`
+
+* Resampling -> `summary(object$represampling)`
+
+* Benchmarks -> `summary(object$benchmarks)`
+
+* Package Info -> `summary(object$package.version)`
+]
+
+.pull-right[
+
+Workhorse functions: 
+
+* `sperrorest()` (sequential)
+
+* `parsperrorest()` (parallelized)
+
+Package vignette:
+
+* https://pat-s.github.io/sperrorest/articles/sperrorest-vignette.html
+
+]
+
+---
+
+# Material & Contact
+
+Web: https://pat-s.github.io
+
+Twitter: [@pjs_228](https://twitter.com/pjs_228)
+
+PDF-Slides: https://speakerdeck.com/pat_s/sperrorest-egu2017-presentation
+
+GIScience group, University of Jena
+
+```{r, eval = FALSE, echo = FALSE}
+data(ecuador) # Muenchow et al. (2012), see ?ecuador
+fo <- slides ~ dem + slope + hcurv + vcurv + log.carea + cslope
+# Example of a classification tree fitted to this data:
+library(rpart)
+ctrl <- rpart.control(cp = 0.005) # show the effects of overfitting
+fit <- rpart(fo, data = ecuador, control = ctrl)
+
+mypred.rpart <- function(object, newdata) predict(object, newdata)[, 2]
+
+# Non-spatial 5-repeated 10-fold cross-validation:
+nspres <- parsperrorest(data = ecuador, formula = fo,
+                        model.fun = rpart, model.args = list(control = ctrl),
+                        pred.fun = mypred.rpart,
+                        smp.fun = partition.cv, 
+                        par.args = list(par.units = 20, par.mode = 1),
+                        importance = TRUE, imp.permutations = 200,
+                        smp.args = list(repetition = 1:100, nfold = 10),
+                        benchmark = TRUE)
+saveRDS(nspres, "~/Desktop/presentations/sperrorest-EGU2017/r-objects/nspres.rda")
+saveRDS(nspres, here("r-objects/nspres.rda"))
+
+# Spatial 5-repeated 10-fold cross-validation:
+spres <- parsperrorest(data = ecuador, formula = fo,
+                       model.fun = rpart, model.args = list(control = ctrl),
+                       pred.fun = mypred.rpart,
+                       smp.fun = partition.kmeans, 
+                       importance = TRUE, imp.permutations = 200,
+                       par.args = list(par.units = 20, par.mode = 1),
+                       smp.args = list(repetition = 1:100, nfold = 10),
+                       benchmark = TRUE)
+saveRDS(spres, "~/Desktop/presentations/sperrorest-EGU2017/r-objects/spres.rda")
+saveRDS(spres, here("r-objects/spres.rda"))
+
+smry <- data.frame(
+  nonspat.training = unlist(summary(nspres$error.rep, level = 1)$train.auroc),
+  nonspat.test     = unlist(summary(nspres$error.rep, level = 1)$test.auroc),
+  spatial.training = unlist(summary(spres$error.rep,  level = 1)$train.auroc),
+  spatial.test     = unlist(summary(spres$error.rep,  level = 1)$test.auroc))
+
+boxplot(smry, col = c('cyan','cyan','purple','purple'), 
+        main = 'Training (cyan) vs. test (purple), nonspatial vs. spatial',
+        ylab = 'Area under the ROC curve')
+```
+

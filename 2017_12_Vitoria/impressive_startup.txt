@@ -1,7 +1,0 @@
- 
-impressive -c memory -W -ff --noclicks
-
--C: faster caching
--W: disable wheel mouse control
--ff: fake-fullscreen in case 2nd monitor is not properly detected
---noclicks: No slide moving using mouse clicks

@@ -1,0 +1,27 @@
+
+# Save as PDF
+
+Execute on mccoy only! Network paths do not seem to work for some reasons.
+
+```{r}
+# save as pdf
+system("`npm bin`/decktape /home/patrick/PhD/presentations/paper1/2018_06_Kolloquium.html /home/patrick/PhD/presentations/paper1/2018_06_Kolloquium.pdf --no-sandbox")
+
+# copy to website
+fs::file_copy(c("2018_06_Kolloquium.pdf"), "~/git/pat-s_web/static/slides/paper1/2018_06_Kolloquium.pdf",
+          overwrite = TRUE)
+
+# DONT FORGET TO DEPLOY
+```
+
+## Impressive startup
+
+Options: 
+
+-ff : Fake-Fullscreen
+--windowed: Window Box
+--fullscreen: Fullscreen
+
+```{r}
+system("impressive -c memory -t WipeLeft -ff --noclicks --nowheel --fade 2018_06_Kolloquium.pdf")
+```

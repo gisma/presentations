@@ -1,0 +1,511 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Performance evaluation and hyperparameter sensitivity analysis of parametric and machine-learning models using spatial data</title>
+    <meta charset="utf-8">
+    <meta name="author" content="Patrick Schratz" />
+    <link href="libs/font-awesome/css/fa-svg-with-js.css" rel="stylesheet" />
+    <script src="libs/font-awesome/js/fontawesome-all.min.js"></script>
+    <script src="libs/font-awesome/js/fa-v4-shims.min.js"></script>
+    <link href="libs/ionicons/css/ionicons.min.css" rel="stylesheet" />
+    <link rel="stylesheet" href="mtheme.css" type="text/css" />
+    <link rel="stylesheet" href="font-mtheme.css" type="text/css" />
+  </head>
+  <body>
+    <textarea id="source">
+
+
+
+
+
+
+
+class: title-slide  
+
+# Performance evaluation and hyperparameter tuning of statistical and machine-learning models using spatial data
+
+&lt;html&gt;&lt;div style='float:left'&gt;&lt;/div&gt;&lt;hr color='#EB811B' size=1px width=796px&gt;&lt;/html&gt;
+
+### Patrick Schratz&lt;sup&gt;1&lt;/sup&gt;, Jannes Muenchow&lt;sup&gt;1&lt;/sup&gt;, Jakob Richter&lt;sup&gt;2&lt;/sup&gt;, Alexander Brenning&lt;sup&gt;1&lt;/sup&gt;
+
+&lt;p style="margin-left:15px;"&gt;
+
+&lt;br&gt;
+
+Kolloquium (Institute of Statistics), Munich, 20 Jun 2018
+
+&lt;br&gt;&lt;br&gt;
+
+&lt;i class="fa fa-university"&gt;&lt;/i&gt; &lt;sup&gt;1&lt;/sup&gt; Department of Geography, GISciene group, University of Jena  &lt;a href="http://www.geographie.uni-jena.de/en/Geoinformatik_p_1558.html"&gt;&lt;i class="fa fa-external-link"&gt;&lt;/i&gt;&lt;/a&gt; &lt;br&gt;
+
+&lt;i class="fa fa-university"&gt;&lt;/i&gt; &lt;sup&gt;2&lt;/sup&gt; Department of Statistics, TU Dortmund
+&lt;a href="https://www.statistik.tu-dortmund.de/aktuelles.html"&gt;&lt;i class="fa fa-external-link"&gt;&lt;/i&gt;&lt;/a&gt;
+&lt;br&gt;&lt;br&gt;
+
+&lt;i class="fa fa-home"&gt;&lt;/i&gt; &lt;a href="https://pat-s.github.io"&gt;https://pat-s.github.io&lt;/a&gt; &amp;emsp; 
+
+&lt;i class="fa fa-twitter"&gt;&lt;/i&gt; &lt;a href="https://twitter.com/pjs_228"&gt;@pjs_228&lt;/a&gt; &amp;emsp; 
+
+&lt;i class="fa fa-github"&gt;&lt;/i&gt; &lt;a href="https://github.com/pat-s"&gt;@pat-s&lt;/a&gt; &amp;emsp; 
+
+&lt;i class="fa fa-stack-exchange"&gt;&lt;/i&gt; &lt;a href="https://stackoverflow.com/users/4185785/pat-s"&gt;@pjs_228&lt;/a&gt; &amp;emsp;  &lt;br&gt;
+
+&lt;i class="fa fa-envelope"&gt;&lt;/i&gt; &lt;a href="patrick.schratz@uni-jena.de"&gt;patrick.schratz@uni-jena.de&lt;/a&gt;&amp;emsp;
+
+&lt;i class="fa fa-linkedin"&gt;&lt;/i&gt; &lt;a href="https://www.linkedin.com/in/patrick-schratz/"&gt;Patrick Schratz&lt;/a&gt;&amp;emsp;
+
+&lt;/p&gt;
+
+&lt;div class="my-header"&gt;&lt;img src="figs/life.jpg" style="width = 5%;" /&gt;&lt;/div&gt; 
+
+---
+
+layout: true
+
+&lt;div class="my-header"&gt;&lt;img src="figs/life.jpg" style="width = 5%;" /&gt;&lt;/div&gt;       
+
+---
+
+
+# Outline
+
+.font150[
+1. Introduction
+
+2. Data and study area
+
+3. Methods
+
+4. Results
+
+5. Discussion
+]
+
+---
+class: inverse, center, middle
+
+# Introduction
+
+&lt;html&gt;&lt;div style='float:left'&gt;&lt;/div&gt;&lt;hr color='#EB811B' size=1px width=720px&gt;&lt;/html&gt; 
+
+---
+
+# Introduction
+
+### \# Whoami
+
+- "Data Scientist"
+- Studied B.Sc. **Geography** &amp; M.Sc. **Geoinformatics** at University of Jena
+- Self-taught programmer
+- Interested in model optimization, R package development, server administration
+
+#### Contributions to `mlr`
+- Integrated new sampling scheme for CV: Spatial sampling
+- Redesigned the tutorial site (`mkdocs`-&gt; `pkgdown`)
+- Added getter for inner resampling indices
+- more to come ;)
+
+---
+
+# Introduction
+
+.pull-left[
+
+### LIFE Healthy Forest &lt;i class="fa fa-tree"&gt;&lt;/i&gt;
+ 
+Early detection and advanced management systems to reduce forest decline by invasive and pathogenic agents.
+
+**Main task**: Spatial (modeling) analysis to support the early detection of various pathogens.
+
+## Pathogens &lt;i class="fa fa-bug"&gt;&lt;/i&gt;
+
+* Fusarium circinatum 
+* **Diplodia sapinea** (&lt;i class="fa fa-arrow-right"&gt;&lt;/i&gt; needle blight)
+* Armillaria root disease
+* Heterobasidion annosum
+
+]
+
+.pull-right[
+
+.center[
+![:scale 90%](figs/diplodia.jpg)  
+.font70[**Fig. 1:** Needle blight caused by **Diplodia pinea**]
+]
+]
+
+---
+
+# Introduction
+
+## Motivation
+
+* Find the model with the **highest predictive performance**.
+
+* Results are assumed to be representative for data sets with similar predictors and different pathogens (response).
+
+* Be aware of **spatial autocorrelation** &lt;i class="fa fa-exclamation-triangle"&gt;&lt;/i&gt;
+
+* Analyze differences between spatial and non-spatial hyperparameter tuning (no research here yet!).
+
+* Analyze differences in performance between algorithms and sampling schemes in CV (both performance estimation and hyperparameter tuning)
+
+---
+class: inverse, center, middle
+
+# Data &lt;i class="fa fa-database"&gt;&lt;/i&gt; &amp; Study Area &lt;i class="fa fa-map"&gt;&lt;/i&gt;
+
+&lt;html&gt;&lt;div style='float:left'&gt;&lt;/div&gt;&lt;hr color='#EB811B' size=1px width=720px&gt;&lt;/html&gt;
+
+---
+
+# Data &lt;i class="fa fa-database"&gt;&lt;/i&gt; &amp; Study Area &lt;i class="fa fa-map"&gt;&lt;/i&gt;
+
+.code70[
+
+```
+## Skim summary statistics  
+##  n obs: 926    
+##  n variables: 12    
+## 
+## Variable type: factor
+## 
+##  variable     missing     n     n_unique                    top_counts                 
+## -----------  ---------  -----  ----------  --------------------------------------------
+##   diplo01        0       926       2                  0: 703, 1: 223, NA: 0            
+##  lithology       0       926       5        clas: 602, chem: 143, biol: 136, surf: 32  
+##    soil          0       926       7         soil: 672, soil: 151, soil: 35, pron: 22  
+##    year          0       926       4        2009: 401, 2010: 261, 2012: 162, 2011: 102 
+## 
+## Variable type: numeric
+## 
+##    variable       missing     n      mean      p0       p50       p100       hist   
+## ---------------  ---------  -----  --------  -------  --------  --------  ----------
+##       age            0       926    18.94       2        20        40      ▂▃▅▆▇▂▂▁ 
+##    elevation         0       926    338.74    0.58     327.22    885.91    ▃▇▇▇▅▅▂▁ 
+##    hail_prob         0       926     0.45     0.018     0.55       1       ▇▅▁▂▆▇▃▁ 
+##      p_sum           0       926    234.17    124.4    224.55    496.6     ▅▆▇▂▂▁▁▁ 
+##       ph             0       926     4.63     3.97      4.6       6.02     ▃▅▇▂▂▁▁▁ 
+##      r_sum           0       926    -4e-05    -0.1     0.0086    0.082     ▁▂▅▃▅▇▃▂ 
+##  slope_degrees       0       926    19.81     0.17     19.47     55.11     ▃▆▇▆▅▂▁▁ 
+##      temp            0       926    15.13     12.59    15.23      16.8     ▁▁▃▃▆▇▅▁
+```
+]
+
+---
+
+# Data &lt;i class="fa fa-database"&gt;&lt;/i&gt; &amp; Study Area &lt;i class="fa fa-map"&gt;&lt;/i&gt;
+
+.center[
+![:scale 100%](figs/study_area.png)  
+.font70[**Fig. 2:** Study area (Basque Country, Spain)]
+]
+
+---
+class: inverse, center, middle
+
+# Methods &lt;i class="fa fa-cogs"&gt;&lt;/i&gt;
+
+&lt;html&gt;&lt;div style='float:left'&gt;&lt;/div&gt;&lt;hr color='#EB811B' size=1px width=720px&gt;&lt;/html&gt; 
+
+---
+
+# Methods &lt;i class="fa fa-cogs"&gt;&lt;/i&gt;
+
+## Machine-learning models
+
+* Boosted Regression Trees (`BRT`)
+* Random Forest (`RF`)
+* Support Vector Machine (`SVM`)
+* k-nearest Neighbor (`KNN`)
+
+## Parametric models
+
+* Generalized Addtitive Model (`GAM`)
+* Generalized Linear Model (`GLM`)
+
+## Performance Measure
+
+Brier Score
+
+---
+
+# Methods &lt;i class="fa fa-cogs"&gt;&lt;/i&gt;
+
+## Nested Cross-Validation
+
+ * Cross-validation for **performance estimation** 
+
+ * Cross-validation for **hyperparameter tuning** (sequential based model optimization) 
+    
+Different sampling strategies (Performance estimation/Tuning):
+
+* Non-Spatial/Non-Spatial
+
+* Spatial/Non-Spatial
+
+* Spatial/Spatial
+
+* Non-Spatial/No Tuning
+
+* Spatial/No Tuning
+
+---
+
+# Methods &lt;i class="fa fa-cogs"&gt;&lt;/i&gt;
+
+## Nested (spatial) cross-validation
+
+.center[
+![:scale 100%](figs/cross-validation_farbig.png)  
+.font70[**Fig. 3:** Nested spatial/non-spatial cross-validation]] 
+
+---
+
+# Methods &lt;i class="fa fa-cogs"&gt;&lt;/i&gt;
+
+## Nested (spatial) cross-validation
+
+&lt;br&gt;
+
+.center[
+![:scale 100%](figs/spcv_nspcv_folds_pres.png)  
+.font70[**Fig. 4:** Comparison of spatial and non-spatial partitioning of the data set.]
+]
+
+---
+
+# Methods &lt;i class="fa fa-cogs"&gt;&lt;/i&gt;
+
+#### Hyperparameter tuning search spaces
+
+RF : [Probst, Wright, and Boulesteix (2018)](#bib-Probst2018b)  
+BRT, SVM, KNN: Self-defined limits based on evaluation of estimated hyperparameters
+
+.center[
+![](figs/tuning_limits.png)  
+.font70[**Table 1:** Hyperparameter limits and types of each model.  
+Notations of hyperparameters from the respective R packages were used.  
+`\(p\)` = Number of variables.]
+]
+
+---
+class: inverse, center, middle
+
+# Results &lt;i class="fa fa-image"&gt;&lt;/i&gt; 
+
+&lt;html&gt;&lt;div style='float:left'&gt;&lt;/div&gt;&lt;hr color='#EB811B' size=1px width=720px&gt;&lt;/html&gt; 
+
+---
+
+# Results &lt;i class="fa fa-image"&gt;&lt;/i&gt; 
+
+## Hyperparameter tuning
+
+.center[ 
+![:scale 55%](figs/iterations_vs_auroc.png)  
+]
+.font70[**Fig 4:** Hyperparameter tuning results of the spatial/spatial CV setting for BRT, WKNN, RF and SVM: Number of tuning iterations  
+(1 iteration = 1 random hyperparameter setting)
+vs. predictive performance (AUROC).
+]
+
+---
+
+# Results &lt;i class="fa fa-image"&gt;&lt;/i&gt; (Predictive Performance)
+
+.center[
+![:scale 65%](figs/cv_boxplots_final.png)  
+]
+.font70[**Fig 5:**  (Nested) CV estimates of model performance at the repetition level using 200 random search iterations. CV setting refers to perfomance estimation/hyperparameter tuning
+of the respective (nested) CV, e.g. ”Spatial/Non-Spatial” means that spatial partitioning was
+used for performance estimation and non-spatial partitioning for hyperparameter tuning.
+]
+
+---
+class: inverse, center, middle
+
+# Discussion &lt;i class="fa fa-comments"&gt;&lt;/i&gt;
+
+&lt;html&gt;&lt;div style='float:left'&gt;&lt;/div&gt;&lt;hr color='#EB811B' size=1px width=720px&gt;&lt;/html&gt; 
+
+---
+
+# Discussion &lt;i class="fa fa-comments"&gt;&lt;/i&gt;
+
+## Predictive performance
+
+* `RF` and `GAM` showed the best predictive performance &lt;i class="fa fa-trophy"&gt;&lt;/i&gt;
+
+--
+
+* High bias in performance when using non-spatial CV
+
+---
+
+# Discussion &lt;i class="fa fa-comments"&gt;&lt;/i&gt; (Performance)
+
+.center[
+![:scale 65%](figs/cv_boxplots_final.png)  
+]
+.font70[**Fig 6:**  (Nested) CV estimates of model performance at the repetition level using 200 random search iterations. CV setting refers to perfomance estimation/hyperparameter tuning
+of the respective (nested) CV, e.g. ”Spatial/Non-Spatial” means that spatial partitioning was
+used for performance estimation and non-spatial partitioning for hyperparameter tuning.
+]
+
+---
+
+# Discussion &lt;i class="fa fa-comments"&gt;&lt;/i&gt;
+
+## Predictive Performance
+
+* `RF` and `GAM` showed the best predictive performance &lt;i class="fa fa-trophy"&gt;&lt;/i&gt;
+
+* High bias in performance when using non-spatial CV
+
+* Parametric models (`GLM`, `GAM`) show equally good performance estimates as the best ML algorithm (`RF`)
+
+---
+
+# Discussion &lt;i class="fa fa-comments"&gt;&lt;/i&gt;
+
+### [Iturritxa et al. (2014)](http://onlinelibrary.wiley.com/doi/10.1111/ppa.12328/abstract)
+
+GLM: 0.65 AUROC (without predictor `hail`) 
+
+GLM: 0.96 AUROC (with predictor `hail`)
+
+### This work
+
+GLM: 0.66 AUROC (without predictor `hail_prob`) + slope, pH, lithology, soil
+
+GLM: 0.694 (with predictor `hail_prob`) + slope, pH, lithology, soil
+
+---
+
+# Discussion &lt;i class="fa fa-comments"&gt;&lt;/i&gt;
+
+## Hyperparameter tuning
+
+* Saturates at 50 repetitions and has a small effect for `SVM` and `BRT` (arbitrary defaults).
+
+--
+
+* Almost no effect on predictive performance for WKNN and RF (reasonable defaults).
+
+--
+
+* Default hyperparameters of `RF` (and all other learners) are not suitable for spatial data 
+
+---
+
+# Discussion &lt;i class="fa fa-comments"&gt;&lt;/i&gt; (Tuning)
+
+![](figs/tuning_effects_rf_sp_vs_nsp.png)
+.font70[**Fig 7:** Best hyperparameter settings by fold (500 total) each estimated from 200 random search tuning iterations per fold using five-fold cross-validation. Split by spatial and non-spatial partitioning setup.
+Red crosses indicate default hyperparameter values.
+Black dots represent the winning hyperparameter setting out of each random search tuning of the respective fold.]
+
+---
+
+# Discussion &lt;i class="fa fa-comments"&gt;&lt;/i&gt;
+
+## Hyperparameter tuning
+
+* Saturates at ~ 50 repetitions and has a small effect for `SVM` and `BRT` (arbitrary defaults).
+
+* Almost no effect for `WKNN` and `RF` (reasonable defaults).
+
+* Default hyperparameters of `RF` (and all other learners) are not suitable for spatial data 
+    
+    * They **possibly** lead to biased performance estimates as they cause fitted models to make use of the remaining spatial autocorrelation in the data.
+    * Meaningful default values (`RF`, `WKNN`) have been estimated on non-spatial data sets.
+
+&lt;i class="fa fa-exclamation-circle"&gt;&lt;/i&gt; Always perform a spatial hyperparameter tuning for spatial data sets, even if it does not improve accuracy &lt;i class="fa fa-exclamation-circle"&gt;&lt;/i&gt;
+
+---
+
+# References &lt;i class="fa fa-copy"&gt;&lt;/i&gt;
+
+&lt;i class="fa fa-file-text-o" aria-hidden="true"&gt;&lt;/i&gt;  Bergstra, J., &amp; Bengio, Y. (2012). Random search for hyperparameter optimization. J. Mach. Learn. Res., 13, 281–305. URL: http://dl.acm.org/citation.cfm?id=2188385.2188395.
+
+&lt;i class="fa fa-file-text-o" aria-hidden="true"&gt;&lt;/i&gt; Iturritxa, E., Mesanza, N., &amp; Brenning, A. (2014). Spatial analysis of the risk of major forest diseases in Monterey pine plantations. Plant Pathology, 64, 880–889. doi:[10.1111/ppa.12328](http://onlinelibrary.wiley.com/doi/10.1111/ppa.12328/abstract).
+
+Probst, P, M. Wright and A. Boulesteix (2018). "Hyperparameters
+and Tuning Strategies for Random Forest". In: _ArXiv e-prints_.
+arXiv: 1804.03515 [stat.ML].
+
+---
+class: inverse, center, middle
+
+# Backup &lt;i class="fa fa-plus-square"&gt;&lt;/i&gt;
+
+&lt;html&gt;&lt;div style='float:left'&gt;&lt;/div&gt;&lt;hr color='#EB811B' size=1px width=720px&gt;&lt;/html&gt; 
+
+---
+
+# Backup &lt;i class="fa fa-plus-square"&gt;&lt;/i&gt;
+
+.center[
+![:scale 100%](figs/tuning_effects_all_models.png)
+]
+
+---
+
+# Backup &lt;i class="fa fa-plus-square"&gt;&lt;/i&gt;
+
+&lt;br&gt;
+
+.center[
+![:scale 80%](figs/table_auroc_values.png)
+]
+    </textarea>
+<script src="https://remarkjs.com/downloads/remark-latest.min.js"></script>
+<script src="macros.js"></script>
+<script>var slideshow = remark.create({
+"ratio": "4:3",
+"highlightStyle": "github",
+"highlightLines": true,
+"countIncrementalSlides": false
+});
+if (window.HTMLWidgets) slideshow.on('afterShowSlide', function (slide) {
+  window.dispatchEvent(new Event('resize'));
+});
+(function() {
+  var d = document, s = d.createElement("style"), r = d.querySelector(".remark-slide-scaler");
+  if (!r) return;
+  s.type = "text/css"; s.innerHTML = "@page {size: " + r.style.width + " " + r.style.height +"; }";
+  d.head.appendChild(s);
+})();</script>
+
+<script>
+(function() {
+  var i, text, code, codes = document.getElementsByTagName('code');
+  for (i = 0; i < codes.length;) {
+    code = codes[i];
+    if (code.parentNode.tagName !== 'PRE' && code.childElementCount === 0) {
+      text = code.textContent;
+      if (/^\\\((.|\s)+\\\)$/.test(text) || /^\\\[(.|\s)+\\\]$/.test(text) ||
+          /^\$\$(.|\s)+\$\$$/.test(text) ||
+          /^\\begin\{([^}]+)\}(.|\s)+\\end\{[^}]+\}$/.test(text)) {
+        code.outerHTML = code.innerHTML;  // remove <code></code>
+        continue;
+      }
+    }
+    i++;
+  }
+})();
+</script>
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+(function () {
+  var script = document.createElement('script');
+  script.type = 'text/javascript';
+  script.src  = 'https://cdn.bootcss.com/mathjax/2.7.1/MathJax.js?config=TeX-MML-AM_CHTML';
+  if (location.protocol !== 'file:' && /^https?:/.test(script.src))
+    script.src  = script.src.replace(/^https?:/, '');
+  document.getElementsByTagName('head')[0].appendChild(script);
+})();
+</script>
+  </body>
+</html>

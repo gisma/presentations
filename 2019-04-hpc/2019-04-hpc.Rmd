@@ -1,0 +1,250 @@
+---
+title: "Presentation of the new High-Performance-Cluster"
+subtitle: "<html><div style='float:left'></div><hr color='#EB811B' size=1px width=796px></html>"
+author: "Patrick Schratz"
+date: "GIScience Seminar Series, Jena, 17 April 2019"
+output:
+  xaringan::moon_reader:
+    lib_dir: libs
+    nature:
+      beforeInit: "macros.js"
+      ratio: "4:3"
+      highlightStyle: github
+      highlightLines: true
+      countIncrementalSlides: false
+    seal: false
+    #chakra: "libs/remark-latest.min.js"
+    css: ["mtheme.css", "font-mtheme.css"]
+---
+
+```{r setup, include=FALSE}
+options(htmltools.dir.version = FALSE)
+library(icon)
+```
+
+class: title-slide  
+
+# Presentation of the new High-Performance-Cluster
+
+<html><div style='float:left'></div><hr color='#EB811B' size=1px width=796px></html>
+
+### Patrick Schratz
+
+<p style="margin-left:15px;">
+
+<br>
+
+GIScience Seminar Series, Jena, 17th April 2019
+
+<br><br>
+
+`r fa_university()` <sup>1</sup> Department of Geography, GIScience group, University of Jena  <a href="https://www.geographie.uni-jena.de/Geoinformatik.html">`r fa_external_link_alt()`</a>
+
+<br><br>
+
+`r fa_home()` <a href="https://pjs-web.de">https://pjs-web.de</a> &emsp; 
+
+`r fa_twitter()` <a href="https://twitter.com/pjs_228">@pjs_228</a> &emsp; 
+
+`r fa_github()` <a href="https://github.com/pat-s">@pat-s</a> &emsp; 
+
+`r fa_stack_exchange()` <a href="https://stackoverflow.com/users/4185785/pat-s">@pjs_228</a> &emsp;  <br>
+
+`r fa_envelope()` <a href="patrick.schratz@uni-jena.de">patrick.schratz@uni-jena.de</a>&emsp;
+
+`r fa_linkedin()` <a href="https://www.linkedin.com/in/patrick-schratz/">Patrick Schratz</a>&emsp;
+
+</p>
+
+---
+
+# Why a cluster?
+
+.font150[
+- Scalable
+
+- Low(er) maintenance
+
+- Better performance
+
+- Job scheduling
+
+]
+
+---
+
+# Hardware
+
+.font150[
+**CPU:** AMD Threadripper 2950X, 16-core, 3.5 GHz - 4.4 GHz
+
+**RAM:** 126 GB DDR4
+
+**Disk:** 1 TB M2 SSD
+
+**Nodes:** 4 (3 computes) - soon 7 computes.
+]
+
+---
+
+# Software
+
+.font150[
+
+- **OS:** CentOS 7
+
+- **Library Management:** Spack
+
+- **Load Monitoring:** Ganglia
+
+- **Scheduler:** Slurm
+
+- **Cluster Management:** Warewulf
+
+- RStudio Server Pro
+]
+
+---
+
+# Why a scheduler?
+
+.font150[
+
+- Takes care of the execution queue for multiple users
+
+- Forces you to think about CPU and memory usage **before** sending your job
+
+- Distributes jobs across the cluster `r fa_arrow_right()` parallelization on the node level
+
+- Only store your project on one machine - the scheduler will distribute the processing for you
+]
+
+---
+
+class: center, middle
+
+.font200[
+## Live intro to the scheduler
+]
+
+---
+
+# Vocabular
+
+.font150[
+
+**Job:** Code to run, e.g. a R script or a single line of code
+
+**Task:** Jobs can consist of multiple tasks. All tasks will have the same settings when submitted via `--array`.
+
+**Compute Node:** One machine in the cluster. Only used for processing.
+
+**Frontend Node:** The "master" node to which you log in. 
+
+]
+
+---
+
+# Sending jobs
+
+.font150[
+
+- via R packages `drake` or `clustermq`
+
+- "Scheduler template" required to tell the scheduler what resources (CPU/Mem) you need
+]
+
+---
+
+# Sending jobs
+
+.font180[
+
+`slurm_clustermq.tmpl`
+
+```sh
+#!/bin/sh
+#SBATCH --job-name={{ job_name }}
+#SBATCH --partition=normal
+#SBATCH --output={{ log_file | /dev/null }}
+#SBATCH --error={{ log_file | /dev/null }}
+#SBATCH --cpus-per-task={{ n_cpus }}
+#SBATCH --mem={{ memory }}
+#SBATCH --array=1-{{ n_jobs }}
+```
+]
+
+---
+
+# Sending jobs
+
+.font150[
+
+- Arguments of the template are passed via 
+  - `drake::make(template = list())` or
+  - `clustermq::Q(template = list())`
+
+- Required: 
+  - Number of CPUS (`n_cpus`)
+  - Memory (`memory`)
+
+]
+
+---
+
+# drake vs. clustermq
+
+.font150[
+
+- `drake` > `clustermq`
+
+- `drake` uses `clustermq` under the hood
+
+- `drake` knows the execution order of all R objects in your project
+
+- `drake` distributes all your analysis in order / parallel to the cluster with ONE R command
+
+]
+
+---
+
+# Libraries
+
+.font150[
+
+Managed via [Spack](spack.io)
+
+- Uses the concept of "environment modules" unter the hood
+
+- All required libraries need to be specifically loaded after login
+
+- Possibility to load libraries at startup (`~/.bashrc`)
+
+]
+
+---
+
+class: center, middle
+
+.font180[
+## Live demo: Processing
+]
+
+---
+
+# FAQ
+
+.font130[
+
+- Can I login / use the nodes standalone? `r fa_arrow_right()` No.
+
+- Is there a user guide? `r fa_arrow_right()` Yes, at https://jupiter.geogr.uni-jena.de/hpc/
+
+- What if I want to report an issue? `r fa_arrow_right()` https://venus.geogr.uni-jena.de/giscience/hpc-user-guide
+
+- Do I have to use `drake` or `clustermq`? `r fa_arrow_right()` Yes, to use the nodes for processing in R there is no other way.
+
+- `drake` is complicated, I do not understand it. `r fa_arrow_right()` There is a manual (https://ropenscilabs.github.io/drake-manual/#) that will help you understand `r fa_kiwi_bird()`
+
+`r fa_linux()`
+]

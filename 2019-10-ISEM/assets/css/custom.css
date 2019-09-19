@@ -13,3 +13,22 @@
 .large {
   font-size: 1.5em;
 }
+
+.big-inv {
+  font-size: 100px;
+}
+
+.big-q {
+  font-size: 70px;
+}
+
+.pkg {
+  color: black;
+  font-weight: 400;
+  font-size: 95%;
+  font-family: IBM Plex Mono;
+  padding: 1px 4px;
+  background-color: #e8e8e2;
+  border-radius: 4px;
+  border: 1px solid black;
+}

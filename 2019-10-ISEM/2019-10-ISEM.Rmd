@@ -13,16 +13,19 @@ output:
       highlightLines: true
       countIncrementalSlides: false
     seal: false
-    #chakra: "libs/remark-latest.min.js"
+    beforeInit: assets/js/zoom.js
     css: 
        - xaringan-themer.css
        - assets/css/custom.css
+       - assets/css/tachyons.min.css
 ---
 
 ```{r xaringan-themer, include = FALSE}
 options(htmltools.dir.version = FALSE)
 library(icon)
 library(xaringanthemer)
+library(magrittr)
+library(flextable)
 solarized_light(
   header_font_google = google_font("Josefin Sans"),
   text_font_google   = google_font("Montserrat", "500", "400i"),
@@ -119,6 +122,31 @@ knitr::include_graphics("https://raw.githubusercontent.com/mlr-org/mlr/master/ma
 
 - Analyze the effect of **combined feature sets**
 
+- Which spectral regions/variables are **most important** for modeling defoliation?
+
+
+---
+
+class: inverse, center, middle
+
+.big-inv[
+Study Design
+]
+
+---
+
+# Workflow
+
+- Usage of the **R** programming language
+
+- Completely **reproducible**
+
+- "makefile" approach using the DSL of the .pkg[drake] package
+
+- Model fitting/evaluation via the .pkg[mlr] package (machine learning framework in R)
+
+- Research compendioum on [Github](https://github.com/pat-s/2019-feature-selection) and [Zenodo](https://zenodo.org/record/2633102)
+
 ---
 
 # Defoliation
@@ -133,178 +161,290 @@ knitr::include_graphics("https://raw.githubusercontent.com/pat-s/2019-feature-se
 
 ---
 
-# Hardware
+<center><img src="https://raw.githubusercontent.com/pat-s/2019-feature-selection/master/code/98-paper/ieee/jpg/study-area.png" width = "800px"></center>
 
-.font150[
-**CPU:** AMD Threadripper 2950X, 16-core, 3.5 GHz - 4.4 GHz
+---
 
-**RAM:** 126 GB DDR4
+# Hyperspectral Data
 
-**Disk:** 1 TB M2 SSD
+.pull-left[
+- 122 bands
 
-**Nodes:** 4 (3 computes) - soon 7 computes.
+- Band width: ~ 4 nm
+
+- Wavelength range: 400 - 1000 nm
+
+- Acquisition date: September 2016
+]
+
+.pull-right[
+<center><img src="imgs/hs-img.png" width = "900px"></center>
+
+<center>NDVI of Laukiz 1</center>
+]
+---
+
+# Feature Set Creation
+
+- Extraction of hyperspectral reflectances for each tree using a buffer of **two meters**
+
+- Calculation of **90** vegetation indices
+
+- Calculation of all possible "normalized ration indices" (NRI): **7470**
+
+  $NRIᵢⱼ = \frac{bᵢ - bⱼ}{bᵢ + bⱼ}$
+  
+
+.pull-left[
+- **HR** (hyperspectral reflectances)
+
+- **VI** (vegetation indices)
+
+- **NRI** (normalized ratio indices)
+]
+
+.pull-right[
+- **HR** + **VI**
+
+- **HR** + **NRI**
+
+- **HR** + **VI** + **NRI**
 ]
 
 ---
 
-# Software
+# Benchmark Setup
 
-.font150[
+.pull-left[
 
-- **OS:** CentOS 7
+## Models
 
-- **Library Management:** Spack
+**Machine learning**
 
-- **Load Monitoring:** Ganglia
+- Support Vector Machine (SVM)
 
-- **Scheduler:** Slurm
+- Random Forest (RF)
 
-- **Cluster Management:** Warewulf
+- Extreme Gradient Boosting (XGBoost)
 
-- RStudio Server Pro
+**Statistical**
+
+- L1 penalized regression (LASSO)
+- L2 penalized regression (RIDGE)
+]
+
+.pull-right[
+
+## Filters
+
+- (PCA)
+
+- Borda (Ensemble)
+
+- Carscore
+
+- Conditional mutual information criterion
+
+- Information Gain
+
+- Pearson correlation
+
+- Relief
 ]
 
 ---
 
-# Why a scheduler?
+# Benchmark Setup
 
-.font150[
+.pull-left[
+## Hyperparameter optimization
 
-- Takes care of the execution queue for multiple users
+- Model-based optimization (Bayesian)
 
-- Forces you to think about CPU and memory usage **before** sending your job
+  - Initial budget: 30
+  - Sequential budget: 70
 
-- Distributes jobs across the cluster `r fa_arrow_right()` parallelization on the node level
+- Tuning of $p$ (number of variables) during parameter optimization
 
-- Only store your project on one machine - the scheduler will distribute the processing for you
+- Penalized methods: Optimization of penalization term $s$
+
+]
+
+.pull-right[
+
+## Error Measure
+
+Root Mean Square Error (RMSE)
+
+## Resampling Strategy
+
+ Nested 4-fold **spatial cross-validation** (plot-based)
 ]
 
 ---
 
-class: center, middle
+class: inverse, center, middle
 
-.font200[
-## Live intro to the scheduler
+.big-inv[
+Results
 ]
 
 ---
 
-# Vocabular
+.flex[
+.w-65.br0.shadow-1.mr4[
 
-.font150[
+<center><img src="https://raw.githubusercontent.com/pat-s/2019-feature-selection/master/docs/figure/eval-performance.Rmd/performance-results-1.png" width = "710px"></center>
 
-**Job:** Code to run, e.g. a R script or a single line of code
+]
 
-**Task:** Jobs can consist of multiple tasks. All tasks will have the same settings when submitted via `--array`.
+.w-30[
 
-**Compute Node:** One machine in the cluster. Only used for processing.
+## First look
 
-**Frontend Node:** The "master" node to which you log in. 
+- ML > statistical?
+
+- Not much difference between tasks
+
+- Substantial differences between models
+
+- RMSE ~ 34
+
+<br>
+
+`r icon::fa_arrow_right()` Too much information for a single presentation slide
+]
 
 ]
 
 ---
 
-# Sending jobs
+.flex[
+.w-50.mr4[
 
-.font150[
-
-- via R packages `drake` or `clustermq`
-
-- "Scheduler template" required to tell the scheduler what resources (CPU/Mem) you need
-]
-
----
-
-# Sending jobs
-
-.font180[
-
-`slurm_clustermq.tmpl`
-
-```sh
-#!/bin/sh
-#SBATCH --job-name={{ job_name }}
-#SBATCH --partition=normal
-#SBATCH --output={{ log_file | /dev/null }}
-#SBATCH --error={{ log_file | /dev/null }}
-#SBATCH --cpus-per-task={{ n_cpus }}
-#SBATCH --mem={{ memory }}
-#SBATCH --array=1-{{ n_jobs }}
+```{r, echo = FALSE}
+readRDS(url("https://github.com/pat-s/2019-feature-selection/raw/master/code/98-paper/presentation/table-perf.rda"))[1:15,] %>% 
+  flextable() %>% 
+  fontsize(size = 25, part = "all") %>% 
+  color(i = 1, color = "red")
 ```
+
+<div style="height:40px;font-size:2px;">&nbsp;</div>
+
+<center> Best 15 absolute scores </center>
+]
+
+.w-60[
+```{r, echo = FALSE}
+readRDS(url("https://github.com/pat-s/2019-feature-selection/raw/master/code/98-paper/presentation/table-best-learner-per-task.rda")) %>% 
+  flextable::flextable() %>% 
+    fontsize(size = 20, part = "all")
+```
+
+<div style="height:40px;font-size:2px;">&nbsp;</div>
+
+<center> Best scores by learners across all tasks/filters </center>
+
+]
 ]
 
 ---
 
-# Sending jobs
+# Intermediate Summary
 
-.font150[
+`r icon::fa_arrow_right()` No practical difference between most learners regarding their overall performance
 
-- Arguments of the template are passed via 
-  - `drake::make(template = list())` or
-  - `clustermq::Q(template = list())`
+`r icon::fa_arrow_right()` Combination of feature sets does not substantially increase performance
 
-- Required: 
-  - Number of CPUS (`n_cpus`)
-  - Memory (`memory`)
-
-]
+`r icon::fa_arrow_right()` HS reflectance values result in almost similar performance than using indices
 
 ---
 
-# drake vs. clustermq
+class: center, middle
 
-.font150[
-
-- `drake` > `clustermq`
-
-- `drake` uses `clustermq` under the hood
-
-- `drake` knows the execution order of all R objects in your project
-
-- `drake` distributes all your analysis in order / parallel to the cluster with ONE R command
-
-]
-
----
-
-# Libraries
-
-.font150[
-
-Managed via [Spack](spack.io)
-
-- Uses the concept of "environment modules" unter the hood
-
-- All required libraries need to be specifically loaded after login
-
-- Possibility to load libraries at startup (`~/.bashrc`)
-
+.big-q[
+What about the filter differences?
 ]
 
 ---
 
 class: center, middle
 
-.font180[
-## Live demo: Processing
+.big-q[
+Effect of filter methods in general (1/3)
 ]
 
 ---
 
-# FAQ
+class: center
 
-.font130[
+<center><img src="https://raw.githubusercontent.com/pat-s/2019-feature-selection/master/docs/figure/eval-performance.Rmd/filter-effect-1.png" width = "620px"></center>
 
-- Can I login / use the nodes standalone? `r fa_arrow_right()` No.
+Model performances in RMSE when using no filter method compared to the best scoring filter method for each learner across all tasks
 
-- Is there a user guide? `r fa_arrow_right()` Yes, at https://jupiter.geogr.uni-jena.de/hpc/
+---
 
-- What if I want to report an issue? `r fa_arrow_right()` https://venus.geogr.uni-jena.de/giscience/hpc-user-guide
+class: center, middle
 
-- Do I have to use `drake` or `clustermq`? `r fa_arrow_right()` Yes, to use the nodes for processing in R there is no other way.
-
-- `drake` is complicated, I do not understand it. `r fa_arrow_right()` There is a manual (https://ropenscilabs.github.io/drake-manual/#) that will help you understand `r fa_kiwi_bird()`
-
-`r fa_linux()`
+.big-q[
+Effect of ensemble filters (2/3)
 ]
+
+---
+class: center, middle
+
+<center><img src="https://raw.githubusercontent.com/pat-s/2019-feature-selection/master/docs/figure/eval-performance.Rmd/filter-effect-ensemble-1.png" width = "620px"></center>
+
+Model performances in RMSE when using the ensemble "Borda" filter method compared to the best scoring filter method for each learner across all tasks
+
+---
+
+class: center, middle
+
+.big-q[
+Effect of filtering by model (3/3)
+]
+
+---
+class: center, middle
+
+<center><img src="https://raw.githubusercontent.com/pat-s/2019-feature-selection/master/docs/figure/eval-performance.Rmd/filter-perf-all-1.png" width = "620px"></center>
+
+Model performances in RMSE of all used filter methods and PCA for each learner across all tasks
+
+---
+
+# Summary
+
+- Almost no effect of filter for SVM
+
+- **Effect** of filters **differs** across tasks and models (no clear pattern)
+
+- **Ensemble filters** showed **no improvement** in predictive performance compared to simple filters in this study
+
+- **Statistical models** are able to reach **similar performance** as ML models in high-dim settings
+
+- PCA is a valid alternative to filter methods
+
+---
+
+class: center, middle
+
+<iframe src="https://giphy.com/embed/3o6gDSdED1B5wjC2Gc" width="480" height="378" frameBorder="0" class="giphy-embed" allowFullScreen></iframe>
+
+---
+
+class: center, middle
+
+<iframe src="https://giphy.com/embed/129NVCr1UfsGTS" width="480" height="269" frameBorder="0" class="giphy-embed" allowFullScreen></iframe>
+
+---
+
+class: center, middle
+
+.big-q[
+Which features are most important for predicting **defoliation**?
+]
+
+---
+

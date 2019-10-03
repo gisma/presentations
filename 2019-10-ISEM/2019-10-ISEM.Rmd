@@ -63,7 +63,7 @@ ISEM 2019, October 4th 2019, Salzburg, Austria
 layout: true
 
 .footer[
-slides: kutt.it/ISEM 
+slides.pjs-web.de/ISEM
 ]
 
 ---

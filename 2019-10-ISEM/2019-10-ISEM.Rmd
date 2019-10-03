@@ -1,8 +1,7 @@
 ---
-title: "Presentation of the new High-Performance-Cluster"
-subtitle: "<html><div style='float:left'></div><hr color='#EB811B' size=1px width=796px></html>"
-author: "Patrick Schratz"
-date: "ISEM 2019, October 4th 2019, Salzburg, Austria"
+title: ""
+author: ""
+date: ""
 output:
   xaringan::moon_reader:
     lib_dir: libs
@@ -450,11 +449,13 @@ Which features are most important for predicting **defoliation**?
 
 ## Which features are most important for predicting **defoliation**?
 
-<center><img src="https://pogomonster.files.wordpress.com/2014/08/work-in-progress-sign.png" width = "320px"></center>
+<center><img src="imgs/work-in-progress-sign.png" width = "320px"></center>
 
 `r fa_arrow_right()` Paper will be submitted soon
 
 `r fa_arrow_right()` Idea: Relate most important variables (permutation-based VarImp) to spectral regions
+
+.img-credit[img credit https://pogomonster.files.wordpress.com/2014/08/work-in-progress-sign.png]
 
 ```{r xaringan-themer, include = FALSE, eval = FALSE}
 options(htmltools.dir.version = FALSE)
@@ -516,6 +517,12 @@ extra_css = list(
     "line-height" = "0px",
     "font-style" = "italic",
     "text-align" = "start"
+  ),
+  ".img-credit" = list(
+    "position" = "absolute",
+    "font-size" = "0.4em",
+    "text-align" = "center",
+    "width" = "100%"
   )
 )
 write_extra_css(extra_css, here::here("2019-10-ISEM/assets/css/extra.css"))

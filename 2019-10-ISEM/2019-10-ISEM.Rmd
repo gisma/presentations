@@ -7,18 +7,23 @@ output:
   xaringan::moon_reader:
     lib_dir: libs
     nature:
-      beforeInit: "macros.js"
       highlightStyle: solarized-light
       highlightLines: true
       countIncrementalSlides: false
     seal: false
-    beforeInit: assets/js/zoom.js
     css: 
-       - xaringan-themer.css
+       - assets/css/xaringan.css
        - assets/css/custom.css
        - assets/css/tachyons.min.css
        - assets/css/extra.css
 ---
+
+```{r setup, include=FALSE}
+library(icon)
+library(magrittr)
+library(flextable)
+```
+
 
 class: title-slide  
 
@@ -26,7 +31,8 @@ class: title-slide
 
 <html><div style='float:left'></div><hr color='#EB811B' size=1px width=796px></html>
 
-### Patrick Schratz
+### Patrick Schratz<sup>1</sup>
+### .f25[and Jannes Muenchow<sup>1</sup>, Eugenia Iturritxa<sup>3</sup>, José Cortés<sup>1</sup>, Bernd Bischl<sup>2</sup>, Alexander Brenning<sup>1</sup>]
 
 <p style="margin-left:15px;">
 
@@ -36,7 +42,12 @@ ISEM 2019, October 4th 2019, Salzburg, Austria
 
 <br><br>
 
-`r fa_university()` <sup>1</sup> Department of Geography, GIScience group, University of Jena  <a href="https://www.geographie.uni-jena.de/Geoinformatik.html">`r fa_external_link_alt()`</a>
+`r fa_university()` <sup>1 </sup> Department of Geography, GIScience group, University of Jena  <a href="https://www.geographie.uni-jena.de/Geoinformatik.html">`r fa_external_link_alt()`</a>  
+<br>
+`r fa_university()` <sup>2</sup> NEIKER, Vitoria-Gasteiz, Spain <a href="http://www.neiker.net/">`r fa_external_link_alt()`</a>
+<br>
+`r fa_university()` <sup>3</sup> Department of Statistics, Comp. Statistics group, LMU Munich  <a href="https://www.compstat.statistik.uni-muenchen.de/">`r fa_external_link_alt()`</a>
+<br>
 
 <br><br>
 
@@ -46,13 +57,15 @@ ISEM 2019, October 4th 2019, Salzburg, Austria
 
 `r fa_github()` <a href="https://github.com/pat-s">@pat-s</a> &emsp; 
 
-`r fa_stack_exchange()` <a href="https://stackoverflow.com/users/4185785/pat-s">@pjs_228</a> &emsp;  <br>
-
-`r fa_envelope()` <a href="patrick.schratz@uni-jena.de">patrick.schratz@uni-jena.de</a>&emsp;
-
-`r fa_linkedin()` <a href="https://www.linkedin.com/in/patrick-schratz/">Patrick Schratz</a>&emsp;
-
 </p>
+
+---
+
+layout: true
+
+.footer[
+slides: bit.do/ISEM
+]
 
 ---
 
@@ -65,14 +78,14 @@ knitr::include_graphics("https://pjs-web.de/authors/admin/avatar_hud979e34f5123f
 ```
 
 - M.Sc. Geoinformatics
-- Researcher at University of **Jena**
+- Researcher at University of **Jena** and **LMU Munich**
 - PhD Candidate
 
 ]
 
 .pull-right[
-- R developer at University of **Munich**
-- Machine-learning in R ([mlr3](https://github.com/mlr-org/mlr3), [mlr](https://github.com/mlr-org/mlr))
+- Unix & R enthusiast
+- Machine learning in R ([mlr3](https://github.com/mlr-org/mlr3), [mlr](https://github.com/mlr-org/mlr))
 
 ```{r, echo = FALSE}
 knitr::include_graphics("https://raw.githubusercontent.com/mlr-org/mlr/master/man/figures/logo_navbar.png")
@@ -80,12 +93,14 @@ knitr::include_graphics("https://raw.githubusercontent.com/mlr-org/mlr/master/ma
 
 ### Personal focus
 
-- open-source enthusiast
-- reproducible research
-- high-performance computing
+- Open-source software
+- Reproducible research
+- High-performance computing
 - AUR package maintainer
 
 ]
+
+
 
 ---
 
@@ -137,6 +152,19 @@ knitr::include_graphics("https://raw.githubusercontent.com/pat-s/2019-feature-se
 
 .large[
 &emsp; 10 % &emsp;&emsp;&emsp; 20 %  &emsp;&emsp;&emsp; 40%  &emsp;&emsp; 60-70%
+]
+
+Caused by pathogens
+
+.flex[
+.w50.ph4[
+- _Armillaria mellea_
+- _Diplodia sapinea_
+]
+.w50[
+- _Fusarium circinatum_
+- _Heterobasidion annosum_
+]
 ]
 
 ---
@@ -238,7 +266,7 @@ knitr::include_graphics("https://raw.githubusercontent.com/pat-s/2019-feature-se
 
 ---
 
-# Benchmark Setup
+  # Benchmark Setup
 
 .flex[
 .w40.ph2[
@@ -309,7 +337,7 @@ Results
 ```{r, echo = FALSE}
 readRDS(url("https://github.com/pat-s/2019-feature-selection/raw/master/code/98-paper/presentation/table-perf.rda"))[1:15,] %>% 
   flextable() %>% 
-  fontsize(size = 20, part = "all") %>% 
+  fontsize(size = 18, part = "all") %>% 
   color(i = 1, color = "red")
 ```
 
@@ -420,6 +448,14 @@ Which features are most important for predicting **defoliation**?
 
 ---
 
+## Which features are most important for predicting **defoliation**?
+
+<center><img src="https://pogomonster.files.wordpress.com/2014/08/work-in-progress-sign.png" width = "320px"></center>
+
+`r fa_arrow_right()` Paper will be submitted soon
+
+`r fa_arrow_right()` Idea: Relate most important variables (permutation-based VarImp) to spectral regions
+
 ```{r xaringan-themer, include = FALSE, eval = FALSE}
 options(htmltools.dir.version = FALSE)
 library(icon)
@@ -427,11 +463,11 @@ library(xaringanthemer)
 library(magrittr)
 library(flextable)
 solarized_light(
-  outfile = here::here("2019-10-ISEM/assets/xaringan.css"),
+  outfile = here::here("2019-10-ISEM/assets/css/xaringan.css"),
   header_font_google = google_font("Josefin Sans"),
   text_font_google   = google_font("Montserrat", "500", "400i"),
   code_font_google   = google_font("Droid Mono"),
-  title_slide_background_color = "#002733",
+  title_slide_background_color = "white",
   link_color = "#eb1455",
   text_bold_color = "#00589a",
   text_font_size = "25px",
@@ -455,6 +491,31 @@ extra_css = list(
     "margin" = "5px",
     "font-size" = "55px",
     "color" = "black"
+  ),
+  ".title-slide" = list(
+    "background-image" = "url(https://upload.wikimedia.org/wikipedia/commons/thumb/1/19/Uni-Jena-logo.svg/1200px-Uni-Jena-logo.svg.png)",
+    "background-repeat" = "no-repeat",
+    "background-size" = "150px",
+    "background-position" = "bottom right",
+    "background-color" = "#fdf6e3",
+    "font-color" = "black"
+  ),
+  ".title-slide > h3" = list(
+    "color" = "black"
+  ),
+  ".f25" = list(
+    "font-size" = "25px"
+  ),
+  ".footer" = list(
+    "position" = "absolute",
+    "left" = "10px",
+    "bottom" = "0",
+    "width" = "100%",
+    "color" = "black",
+    "font-size" = "12px",
+    "line-height" = "0px",
+    "font-style" = "italic",
+    "text-align" = "start"
   )
 )
 write_extra_css(extra_css, here::here("2019-10-ISEM/assets/css/extra.css"))

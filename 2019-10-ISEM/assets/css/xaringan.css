@@ -18,7 +18,7 @@
  * ------------------------------------------------------- */
 @import url(https://fonts.googleapis.com/css?family=Montserrat:500,400i);
 @import url(https://fonts.googleapis.com/css?family=Josefin+Sans);
-@import url(https://fonts.googleapis.com/css?family=Droid+Mono);
+@import url(https://fonts.googleapis.com/css?family=IBM+Plex+Mono:300,400);
 
 
 body {
@@ -49,7 +49,7 @@ h1, h2, h3 {
     font-size: 35px;
 }
 .remark-code, .remark-inline-code {
-  font-family: Droid Mono, 'Lucida Console', Monaco, monospace;
+  font-family: IBM Plex Mono, 'Lucida Console', Monaco, monospace;
 }
 .remark-code {
   font-size: 0.9em;

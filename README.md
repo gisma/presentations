@@ -3,7 +3,7 @@
 
 ## 2019
 
-- [International Society of Ecological Modelling (ISEM), October 4th, Salzburg Austria](bit.do/ISEM)
+- [International Society of Ecological Modelling (ISEM), October 4th, Salzburg Austria](slides.pjs-web.de/ISEM)
 
 - [whyR conference, September 2019, mlr3 & drake workshop, Warsaw, Poland](https://github.com/mlr-org/mlr3-learndrake)
 

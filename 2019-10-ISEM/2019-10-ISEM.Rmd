@@ -62,7 +62,7 @@ ISEM 2019, October 4th 2019, Salzburg, Austria
 
 layout: true
 
-.footer[
+.slide-link[
 slides.pjs-web.de/ISEM
 ]
 
@@ -98,8 +98,6 @@ knitr::include_graphics("https://raw.githubusercontent.com/mlr-org/mlr/master/ma
 - AUR package maintainer
 
 ]
-
-
 
 ---
 
@@ -515,15 +513,15 @@ extra_css = list(
   ".f25" = list(
     "font-size" = "25px"
   ),
-  ".footer" = list(
+  ".slide-link" = list(
     "position" = "absolute",
-    "left" = "10px",
-    "bottom" = "0",
-    "width" = "100%",
-    "color" = "black",
+    "left" = "3px",
+    "bottom" = "0px",
+    "width" = "max-content",
+    "color" = "#002b36",
     "font-size" = "12px",
     "line-height" = "0px",
-    "font-style" = "italic",
+    "font-style" = "bold italic",
     "text-align" = "start"
   ),
   ".img-credit" = list(

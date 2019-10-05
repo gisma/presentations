@@ -40,15 +40,15 @@
 .f25 {
   font-size: 25px;
 }
-.footer {
+.slide-link {
   position: absolute;
-  left: 10px;
-  bottom: 0;
-  width: 100%;
-  color: black;
+  left: 3px;
+  bottom: 0px;
+  width: max-content;
+  color: #002b36;
   font-size: 12px;
   line-height: 0px;
-  font-style: italic;
+  font-style: bold italic;
   text-align: start;
 }
 .img-credit {

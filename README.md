@@ -3,6 +3,8 @@
 
 ## 2019
 
+- [GIScience Kolloquium, October 30th 2019, Jena, Germany](slides.pjs-web.de/19-10-FSU)
+
 - [International Society of Ecological Modelling (ISEM), October 4th, Salzburg Austria](slides.pjs-web.de/ISEM)
 
 - [whyR conference, September 2019, mlr3 & drake workshop, Warsaw, Poland](https://github.com/mlr-org/mlr3-learndrake)

@@ -63,7 +63,7 @@ GIScience Kolloquium, October 30th 2019, Jena, Germany
 layout: true
 
 .slide-link[
-bit.ly/19-10-FSU
+slides.pjs-web.de/19-10-FSU
 ]
 
 ---

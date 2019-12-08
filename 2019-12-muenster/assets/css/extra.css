@@ -1,0 +1,76 @@
+
+
+/* Extra CSS */
+.remark-slide-content h1 {
+  margin-top: 5px;
+  margin-bottom: 5px;
+}
+.pull-left h1 h2 h3 {
+  margin-top: 5px;
+}
+.h2nm {
+  font-size: 45px;
+  margin: 0px;
+  color: black;
+}
+.h1sm {
+  margin: 5px;
+  font-size: 55px;
+  color: black;
+}
+.title-slide {
+  background-image: img/fsu-logo.eps;
+  background-repeat: no-repeat;
+  background-size: 120px;
+  background-position-x: right;
+  background-position-y: 99%;
+}
+.title-slide > h1 > h2 > h3 > .f25  {
+  color: white;
+}
+.title-slide > h1 {
+  margin-top: -10px;
+}
+.title-slide > h2 {
+  margin-top: -10px;
+  font-size: 25px;
+}
+.f25 {
+  font-size: 25px;
+}
+.f20 {
+  font-size: 20px;
+}
+.f15 {
+  font-size: 15px;
+}
+.big-inv {
+  font-size: 55px;
+}
+.slide-link {
+  position: absolute;
+  left: 3px;
+  bottom: 0px;
+  width: max-content;
+  color: #002b36;
+  font-size: 12px;
+  line-height: 0px;
+  font-style: bold italic;
+  text-align: start;
+}
+.img-credit {
+  position: absolute;
+  font-size: 0.4em;
+  text-align: center;
+  width: 100%;
+}
+.pkg {
+  color: black;
+  font-weight: 400;
+  font-size: 95%;
+  font-family: IBM Plex Mono;
+  padding: 1px 4px;
+  background-color: #f6f8fa;
+  border-radius: 4px;
+  border: 1px solid #82c878;
+}

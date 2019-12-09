@@ -44,11 +44,11 @@ Kolloquium, December 10th 2019, Münster, Germany
 
 .f15[
 
-`r fa_university()` <sup>1 </sup> Department of Geography, GIScience group, University of Jena
+`r fa_university()` <sup>1 </sup> Department of Geography, GIScience group, _University of Jena_
 
-`r fa_university()` <sup>2</sup> NEIKER, Vitoria-Gasteiz, Spain
+`r fa_university()` <sup>2</sup> _NEIKER_, Vitoria-Gasteiz, Spain
 
-`r fa_university()` <sup>3</sup> Department of Statistics, Comp. Statistics group, LMU Munich
+`r fa_university()` <sup>3</sup> Department of Statistics, Comp. Statistics group, _LMU Munich_
 
 <br><br>
 
@@ -65,7 +65,7 @@ Kolloquium, December 10th 2019, Münster, Germany
 layout: true
 
 .slide-link[
-slides.pat-s.me/19-12-MS
+<a href="https://slides.pat-s.me/19-12-MS">slides.pat-s.me/19-12-MS</a>
 ]
 
 ---
@@ -502,6 +502,64 @@ class: center, middle
 Source: https://christophm.github.io/interpretable-ml-book/ale.html
 ]
 
+---
+
+
+class: center, middle
+
+# Backup
+
+---
+
+# MBO tuning
+
+```{r animation, message = FALSE, warning = FALSE, echo=FALSE, eval=TRUE, fig.width=9, fig.height=4, animation.hook='gifski', cache=TRUE, fig.align='center'}
+library(mlrMBO)
+set.seed(2)
+library(ggplot2)
+library(mlrMBO)
+library(animation)
+configureMlr(show.learner.output = FALSE)
+pause = interactive()
+set.seed(1)
+fn = makeCosineMixtureFunction(1)
+obj.fun = convertToMinimization(fn)
+# mbo control with defaults
+ctrl = makeMBOControl()
+ctrl = setMBOControlTermination(ctrl, iters = 10L)
+ctrl = setMBOControlInfill(ctrl, crit = makeMBOInfillCritEI(), opt = "focussearch", opt.focussearch.points = 500L, opt.restarts = 1L)
+design = generateDesign(5L, getParamSet(obj.fun), fun = lhs::maximinLHS)
+run = exampleRun(obj.fun, design = design,
+  control = ctrl, points.per.dim = 1000, show.info = TRUE)
+for(i in 1:10) {
+  plotExampleRun(run, iters = i, pause = pause, densregion = TRUE, gg.objects = list(ggpubr::theme_pubr()))
+}
+```
+
+**Upper:** The surrogate model (black, dashed) models the unknown relationship between input/output (black, solid) based on the initial design (red points).
+
+**Lower**: Mean and variance of the surrogate model (by default a kriging learner) is used to derive the expected improvement criterion (EI). The point which maximizes this is proposed (blue point).
+
+---
+
+# MBO tuning
+
+<center><img src="img/mbo.png" width = "610px"></center>
+
+.f15[
+1. Fit a surrogate model
+
+2. Propose new hyperparameter configuration based on the EI
+
+3. Evaluate performance and update the design
+]
+
+.f20[
+`r fa_arrow_right()` Allows searching in more promising areas rathern than covering the complete space.
+
+`r fa_arrow_right()` Can save a lot of time, especially when the search space is large.
+
+]
 
 ```{r xaringan-themer, include = FALSE, eval = FALSE}
 options(htmltools.dir.version = FALSE)

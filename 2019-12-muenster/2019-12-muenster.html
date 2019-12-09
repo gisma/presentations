@@ -39,11 +39,11 @@ Kolloquium, December 10th 2019, Münster, Germany
 
 .f15[
 
-<i class="fas  fa-university "></i> &lt;sup&gt;1 &lt;/sup&gt; Department of Geography, GIScience group, University of Jena
+<i class="fas  fa-university "></i> &lt;sup&gt;1 &lt;/sup&gt; Department of Geography, GIScience group, _University of Jena_
 
-<i class="fas  fa-university "></i> &lt;sup&gt;2&lt;/sup&gt; NEIKER, Vitoria-Gasteiz, Spain
+<i class="fas  fa-university "></i> &lt;sup&gt;2&lt;/sup&gt; _NEIKER_, Vitoria-Gasteiz, Spain
 
-<i class="fas  fa-university "></i> &lt;sup&gt;3&lt;/sup&gt; Department of Statistics, Comp. Statistics group, LMU Munich
+<i class="fas  fa-university "></i> &lt;sup&gt;3&lt;/sup&gt; Department of Statistics, Comp. Statistics group, _LMU Munich_
 
 &lt;br&gt;&lt;br&gt;
 
@@ -60,7 +60,7 @@ Kolloquium, December 10th 2019, Münster, Germany
 layout: true
 
 .slide-link[
-slides.pat-s.me/19-12-MS
+&lt;a href="https://slides.pat-s.me/19-12-MS"&gt;slides.pat-s.me/19-12-MS&lt;/a&gt;
 ]
 
 ---
@@ -478,6 +478,44 @@ class: center, middle
 &lt;br&gt;
 .f15[
 Source: https://christophm.github.io/interpretable-ml-book/ale.html
+]
+
+---
+
+
+class: center, middle
+
+# Backup
+
+---
+
+# MBO tuning
+
+&lt;img src="2019-12-muenster_files/figure-html/animation-.gif" style="display: block; margin: auto;" /&gt;
+
+**Upper:** The surrogate model (black, dashed) models the unknown relationship between input/output (black, solid) based on the initial design (red points).
+
+**Lower**: Mean and variance of the surrogate model (by default a kriging learner) is used to derive the expected improvement criterion (EI). The point which maximizes this is proposed (blue point).
+
+---
+
+# MBO tuning
+
+&lt;center&gt;&lt;img src="img/mbo.png" width = "610px"&gt;&lt;/center&gt;
+
+.f15[
+1. Fit a surrogate model
+
+2. Propose new hyperparameter configuration based on the EI
+
+3. Evaluate performance and update the design
+]
+
+.f20[
+<i class="fas  fa-arrow-right "></i> Allows searching in more promising areas rathern than covering the complete space.
+
+<i class="fas  fa-arrow-right "></i> Can save a lot of time, especially when the search space is large.
+
 ]
     </textarea>
 <style data-target="print-only">@media screen {.remark-slide-container{display:block;}.remark-slide-scaler{box-shadow:none;}}</style>

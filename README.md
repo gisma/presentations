@@ -3,6 +3,8 @@
 
 ## 2019
 
+- [Kolloquium, December 10th 2019, Münster, Germany](slides.pat-s.me/19-12-MS)
+
 - [GIScience Kolloquium, October 30th 2019, Jena, Germany](slides.pjs-web.de/19-10-FSU)
 
 - [International Society of Ecological Modelling (ISEM), October 4th, Salzburg Austria](slides.pjs-web.de/ISEM)

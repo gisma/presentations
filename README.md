@@ -3,7 +3,7 @@
 
 ## 2019
 
-- [Kolloquium, December 10th 2019, Münster, Germany](slides.pat-s.me/19-12-MS)
+- [Kolloquium, December 10th 2019, Münster, Germany](https://raw.githack.com/pat-s/presentations/master/2019-12-muenster/2019-12-muenster.html)
 
 - [GIScience Kolloquium, October 30th 2019, Jena, Germany](slides.pjs-web.de/19-10-FSU)
 

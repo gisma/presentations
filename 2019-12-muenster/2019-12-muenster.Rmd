@@ -405,9 +405,9 @@ class: center, middle
 
 class: center
 
-<center><img src="https://raw.githubusercontent.com/pat-s/2019-feature-selection/master/docs/figure/eval-performance.Rmd/filter-effect-1.png" width = "610px"></center>
+<center><img src="https://raw.githubusercontent.com/pat-s/2019-feature-selection/master/docs/figure/eval-performance.Rmd/filter-effect-all-vs-no-filter-1.png" width = "610px"></center>
 
-Model performances in RMSE when using **no filter** method compared to the **best scoring filter** method for each learner across all tasks
+Model performances in RMSE when using **no filter** method compared to **any filter** method for each learner across all tasks
 
 ---
 
@@ -418,7 +418,7 @@ class: center, middle
 ---
 class: center, middle
 
-<center><img src="https://raw.githubusercontent.com/pat-s/2019-feature-selection/master/docs/figure/eval-performance.Rmd/filter-effect-ensemble-1.png" width = "610px"></center>
+<center><img src="https://raw.githubusercontent.com/pat-s/2019-feature-selection/master/docs/figure/eval-performance.Rmd/filter-effect-all-vs-borda-filter-1.png" width = "610px"></center>
 
 Model performances in RMSE when using the **ensemble** "Borda" filter method compared to the **best scoring filter** method for each learner across all tasks
 
@@ -431,9 +431,9 @@ class: center, middle
 ---
 class: center, middle
 
-<center><img src="https://raw.githubusercontent.com/pat-s/2019-feature-selection/master/docs/figure/eval-performance.Rmd/filter-perf-all-1.png" width = "620px"></center>
+<center><img src="https://raw.githubusercontent.com/pat-s/2019-feature-selection/master/docs/figure/eval-performance.Rmd/filter-effect-all-vs-no-filter-1.png" width = "610px"></center>
 
-Model performances in RMSE of **all used filter methods** and PCA for each learner across all tasks
+Model performances in RMSE when using **no filter** method compared to **any filter** method for each learner across all tasks
 
 ---
 
@@ -445,15 +445,15 @@ class: center, middle
 
 # Summary
 
-- Almost no effect of filters for SVM
+- Almost no effect of filters for SVM.
 
-- **Effect** of filters **differs** across tasks and models (no clear pattern)
+- **Effect** of filters **differs** across tasks and models (no clear pattern).
 
-- **Ensemble filters** showed **no improvement** in predictive performance compared to simple filters in this study
+- **Ensemble filters** showed **no substantial improvement** in predictive performance compared to simple filters in this study.
 
-- **Statistical models** (i.e. Ridge) are able to reach **similar performance** as ML models in high-dim settings
+- **Statistical models** (i.e. Ridge) are able to reach **similar performance** as ML models in high-dim settings.
 
-- PCA is a valid alternative to filter methods
+- What about PCA?
 
 ---
 
@@ -560,6 +560,18 @@ for(i in 1:10) {
 `r fa_arrow_right()` Can save a lot of time, especially when the search space is large.
 
 ]
+
+
+---
+
+# Borda filter
+
+- "FSelectorRcpp_information.gain"
+- "linear.correlation"
+- "praznik_MRMR"
+- "praznik_CMIM"
+- "carscore"
+- "FSelector_relief"
 
 ```{r xaringan-themer, include = FALSE, eval = FALSE}
 options(htmltools.dir.version = FALSE)

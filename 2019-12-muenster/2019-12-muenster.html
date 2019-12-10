@@ -295,6 +295,37 @@ Root Mean Square Error (RMSE)
 
 ---
 
+# MBO tuning
+
+&lt;img src="2019-12-muenster_files/figure-html/animation-.gif" style="display: block; margin: auto;" /&gt;
+
+**Upper:** The surrogate model (black, dashed) models the unknown relationship between input/output (black, solid) based on the initial design (red points).
+
+**Lower**: Mean and variance of the surrogate model (by default a kriging learner) is used to derive the expected improvement criterion (EI). The point which maximizes this is proposed (blue point).
+
+---
+
+# MBO tuning
+
+&lt;center&gt;&lt;img src="img/mbo.png" width = "610px"&gt;&lt;/center&gt;
+
+.f15[
+1. Fit a surrogate model
+
+2. Propose new hyperparameter configuration based on the EI
+
+3. Evaluate performance and update the design
+]
+
+.f20[
+<i class="fas  fa-arrow-right "></i> Allows searching in more promising areas rathern than covering the complete space.
+
+<i class="fas  fa-arrow-right "></i> Can save a lot of time, especially when the search space is large.
+
+]
+
+---
+
 class: inverse, center, middle
 
 # 2. Results
@@ -486,38 +517,6 @@ Source: https://christophm.github.io/interpretable-ml-book/ale.html
 class: center, middle
 
 # Backup
-
----
-
-# MBO tuning
-
-&lt;img src="2019-12-muenster_files/figure-html/animation-.gif" style="display: block; margin: auto;" /&gt;
-
-**Upper:** The surrogate model (black, dashed) models the unknown relationship between input/output (black, solid) based on the initial design (red points).
-
-**Lower**: Mean and variance of the surrogate model (by default a kriging learner) is used to derive the expected improvement criterion (EI). The point which maximizes this is proposed (blue point).
-
----
-
-# MBO tuning
-
-&lt;center&gt;&lt;img src="img/mbo.png" width = "610px"&gt;&lt;/center&gt;
-
-.f15[
-1. Fit a surrogate model
-
-2. Propose new hyperparameter configuration based on the EI
-
-3. Evaluate performance and update the design
-]
-
-.f20[
-<i class="fas  fa-arrow-right "></i> Allows searching in more promising areas rathern than covering the complete space.
-
-<i class="fas  fa-arrow-right "></i> Can save a lot of time, especially when the search space is large.
-
-]
-
 
 ---
 

@@ -296,7 +296,7 @@ Caused by pathogens:
 
 Root Mean Square Error (RMSE)
 
-$RMSE = \sqrt{\frac{1}{n}\Sigma_{i=1}^{n}{\Big(\frac{d_i -f_i}{\sigma_i}\Big)^2}}$
+$RMSE = \sqrt{\frac{1}{n} \sum_{i=1}^n \left( t_i - r_i \right)^2}$
 
 ## Resampling Strategy
 

@@ -1,6 +1,10 @@
 
 # Conference Talks & Workshops
 
+## 2021
+
+- [OpenDataScience Europe, September 10th 2021, Wageningen, Netherlands](https://my.cynkra.com/connect/talks/opendatascience-eu-2021)
+
 ## 2019
 
 - [Kolloquium, December 10th 2019, Münster, Germany](https://raw.githack.com/pat-s/presentations/master/2019-12-muenster/2019-12-muenster.html)
@@ -27,4 +31,4 @@
 
 - [EU LIFE Healthy Forest, Project meeting, December 2017, Vitoria-Gasteiz, Spain](https://raw.githack.com/pat-s/presentations/master/2017-12-Vitoria/2017_12_Vitoria.html)
 
- 
+

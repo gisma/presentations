@@ -1,0 +1,713 @@
+---
+title: "Machine Learning for spatiotemporal data using {mlr3}"
+author: ['Marc Becker, Patrick Schratz et al.']
+date: '2021-09-10, OpenDataScience Europe Conference'        # 1\. to avoid itemizing
+output:
+  # cynkradown::cynkra_slides:
+  xaringan::moon_reader:
+    chakra: "assets/js/remark.min.js"
+    nature:
+      highlightStyle: github
+      highlightLines: true
+      countIncrementalSlides: false
+      ratio: '16:9'
+      beforeInit: "assets/js/macros.js"
+    self_contained: false
+    css:
+      - assets/css/cynkra-xaringan.css
+    seal: true
+
+fontsize: 10pt
+lang: english                # ngerman, english, italian, french
+font: frutiger
+wide: false
+colorlinks: false
+logo: true
+header-includes:
+  - \usepackage{parskip}
+resource_files:
+  - assets
+---
+
+```{r setup, include=FALSE}
+options(
+  htmltools.dir.version = FALSE,
+  htmltools.preserve.raw = FALSE,
+  repos = structure(c(
+    CRAN = "https://stat.ethz.ch/CRAN/",
+    mlrorg = "https://mlr-org.r-universe.dev"
+  ))
+)
+library("showtext")
+knitr::opts_chunk$set(fig.dim = c(4.8, 3.5), fig.retina = 2, out.width = "100%", cache = F)
+```
+
+```{r pkgs, eval=TRUE, echo=FALSE}
+# needed for rsconnect to install deps
+suppressPackageStartupMessages(library("rgdal"))
+suppressPackageStartupMessages(library("patchwork"))
+suppressPackageStartupMessages(library("ggtext"))
+```
+
+
+## Who I am
+
+.pull-left[
+
+.center[
+![:scale 30%](assets/img/ich.jpeg)
+]
+
+- M.Sc. Geoinformatics
+- Previously researcher at University of **Jena** and LMU **Munich**
+- Now R consultant in Zurich, Switzerland
+- PhD Candidate (Environmental modelling)
+
+]
+
+.pull-right[
+- Unix & R enthusiast
+
+- [Gitea](https://gitea.io/en-us/) (https://gitea.io) contributor
+
+- Member of mlr-org core team; Machine learning in R ![:scale 10%](assets/img/mlr.png)
+  - [mlr3](https://github.com/mlr-org/mlr3) - https://github.com/mlr-org/mlr3
+  - [mlr](https://github.com/mlr-org/mlr) -  https://github.com/mlr-org/mlr
+
+]
+
+---
+
+
+## Where I work
+
+.pull-left[
+- Swiss-based R consulting company (Zurich), founded in 2018 - [www.cynkra.com](www.cynkra.com)
+
+- 5 - 10 people from 7 different countries
+
+- Strong Free and Open-Source (FOSS) philosophy
+
+- [RStudio Certified Partner](https://www.rstudio.com/certified-partners/)
+]
+
+.pull-right[
+![](assets/img/cynkra-team.png)
+]
+
+---
+
+class: middle, inverse, center
+
+# 1. mlr3 Overview
+
+---
+
+## mlr3: Overview
+
+- Why do we want to use mlr3?
+
+- Key principles of mlr3
+
+<br>
+
+Code available at 
+
+https://gist.github.com/pat-s/ae290bd6dd8c2970c7aa0baf200483c4
+
+Slides
+
+https://my.cynkra.com/connect/talks/opendatascience-eu-2021/
+
+---
+
+## <i class="fas fa-question"></i> Why use mlr3
+
+*Users* want to efficiently **train**/**predict**/**benchmark**
+
+- many **methods**
+
+- on many **datasets**
+
+- using different **tuning methods**
+
+- using different **feature selection methods**
+
+- preferably using the **same syntax**
+
+<br>
+
+<i class="fas fa-arrow-right"></i> *Design principles* of {mlr3}
+
+---
+
+## mlr3: Overview
+
+.center.middle[
+![](assets/img/sketch_methods.png)
+]
+
+---
+
+## Motivation: Make benchmarking easy!
+
+.fl.w-70.pa0[
+By unifying
+
+- interfaces to **train** and **predict** methods,
+
+- interfaces to learner **hyperparameters** and **optimizers** (tuning),
+
+- **resampling** (performance estimation),
+
+- **preprocessing** independently from the data,
+
+- **parallelization**, and
+
+- **error handling**
+]
+
+.fl.w-30.pl1.extrasmall[
+<iframe src="https://giphy.com/embed/xUPGck7rzlAftbFZza" width="480" height="270" frameBorder="0" class="giphy-embed" allowFullScreen></iframe><p><a href="https://giphy.com/gifs/nba-warriors-golden-state-xUPGck7rzlAftbFZza">Source: https://giphy.com/gifs/nba-warriors-golden-state-xUPGck7rzlAftbFZza</a></p>
+]
+
+---
+
+## Is it worth to "learn" mlr3?
+
+.pull-left[
+- Avoid making mistakes by relying on **tested functionality**
+  - Predefined performance measures
+  - Resampling
+
+- **Easily scale up** your benchmark
+  - Integrated parallelization
+  - Benchmarking functions
+
+- New methods can be easily integrated into the {mlr3verse}
+]
+
+.pull-right[
+
+![](assets/img/wheel.jpeg)
+]
+
+---
+
+## mlr3 in a nutshell
+
+```{r mlr3-config, echo = FALSE}
+lgr::get_logger("bbotk")$set_threshold("warn")
+lgr::get_logger("mlr3")$set_threshold("warn")
+```
+
+.fl.w-50.pa2[
+```{r example, fig.show="hide"}
+library("mlr3verse", quietly = TRUE)
+set.seed(42)
+
+# example tasks
+tasks <- tsks(c("iris", "german_credit"))
+# from {mlr3learners}
+learners <- lrns(c("classif.rpart",
+  "classif.ranger"))
+
+# run a cross-val
+bmg <- benchmark_grid(
+  tasks, learners,
+  rsmp("cv")
+)
+bmr <- benchmark(bmg)
+
+# visualize by classification error
+autoplot(bmr, measure = msr("classif.ce"))
+```
+]
+
+.fl.w-50.pa2[
+![](`r knitr::fig_chunk("example", "png")`)
+]
+
+---
+
+## Principles of mlr3
+
+
+.fl.w-60.pa2.small[
+- Overcome limitations of S3 with the help of **{R6}**
+  - Truly object-oriented: data and methods live in the same object
+  - Make use of inheritance
+  - Make slight use of reference semantics
+
+- Embrace **{data.table}**, both for arguments and internally
+  - Fast operations for tabular data
+  - List columns to arrange complex objects in tabular structure
+
+- Be **light on dependencies**:
+  - `{R6}`, `{data.table}`, `{lgr}`
+  - Plus some of our own packages (`{backports}`, `{checkmate}`)
+  - Special packages are loaded from mlr3 extension libraries
+]
+
+.fl.w-34.pl2[
+![:scale 95%](assets/img/sketch_inheritance.png)
+]
+
+---
+
+## The mlr3verse
+
+.center.middle[
+![:scale 85%](https://raw.githubusercontent.com/mlr-org/mlr3/main/man/figures/mlr3verse.svg)
+]
+
+---
+
+class: middle, inverse, center
+
+# 2. mlr3 + spatiotemporal data
+
+---
+
+class: middle
+
+## mlr3 + spatiotemporal data
+
+
+- How does mlr3 help in spatiotemporal/environmental/ecological modelling?
+
+- What things do I need to be aware of?
+
+- What is still missing?
+
+- Can I contribute?
+
+---
+
+## mlr3 + spatiotemporal data
+
+There are currently two packages for spatiotemporal analysis in mlr3:
+
+[{mlr3spatiotempcv}](https://github.com/mlr-org/mlr3spatiotempcv)
+
+<i class="fas fa-arrow-right"></i> Spatiotemporal **resampling methods** (for cross-validation)
+
+<br>
+
+[{mlr3spatial}](https://github.com/mlr-org/mlr3spatial)
+
+<i class="fas fa-arrow-right"></i> Spatial **DataBackends** and (parallelized) **prediction** support
+
+<br>
+
+.small[
+Planned but unfinished (and currently unmaintained): [mlr3temporal](https://github.com/mlr-org/mlr3temporal).
+Please reach out to us if you have knowledge in this area and think about contributing  <i class="fas fa-hands-helping"></i>
+]
+
+---
+
+class: middle, inverse, center
+
+# 2.1 mlr3spatial
+
+---
+
+## mlr3spatial .extrasmall[<i class="fas fa-info-circle"></i> {mlr3spatial} is new and not on CRAN yet]
+
+### What's inside the tin?
+
+
+<i class="fas fa-check" style="color:green;"></i>  `DataBackendRaster` for ([{terra}](https://cran.r-project.org/web/packages/terra/index.html), [{raster}](https://cran.r-project.org/web/packages/raster/index.html), [{stars}](https://cran.r-project.org/web/packages/stars/index.html)
+
+<i class="fas fa-check" style="color:green;"></i>  `DataBackendVector` for [{sf}](https://cran.r-project.org/web/packages/sf/index.html))
+
+<i class="fas fa-check" style="color:green;"></i>  Parallel (future-based) predictions via `<learner>$predict()`
+
+<i class="fas fa-check" style="color:green;"></i> Memory-aware chunked predictions
+
+---
+
+## mlr3spatial
+
+Predict the cadmium concentration from the `l7data` dataset (see `?stars::L7_ETMs`).
+
+.fl.w-60.pa1[
+```{r mlr3spatial-ex-1}
+library("mlr3")
+library("mlr3learners")
+library("mlr3spatial")
+
+tif <- system.file("tif/L7_ETMs.tif",
+  package = "stars"
+)
+l7data <- stars::read_stars(tif)
+
+# create mlr3 backend from sf data
+backend <- as_data_backend(l7data)
+```
+]
+
+.fl.w-40.pa1[
+
+- Load required packages
+
+- Load the `L7` data
+
+- Create a `DataBackendSpatial`
+]
+
+---
+
+## mlr3spatial
+
+.fl.w-60.pa1[
+```{r mlr3spatial-ex-2}
+# create a "Random Forest" learner and train it
+learner <- lrn("regr.ranger")
+task <- as_task_regr(backend, target = "layer.1")
+
+rows_train <- sample(1:task$nrow, 1000)
+rows_pred <- setdiff(1:task$nrow, rows_train)
+
+learner$train(task, row_ids = rows_train)
+```
+]
+
+.fl.w-40.pa1[
+- Create a `TaskRegr` with `layer1` as the response
+
+- Train a Random Forest learner ({ranger} package) on a subset of the data (1000 obs.)
+]
+
+.small[<i class="fas fa-info-circle"></i>  Usually one does not split a raster file into train and test - often the train set is composed from point observations and a raster is used for predictions into unknown space.]
+
+---
+
+## mlr3spatial
+
+<i class="far fa-newspaper"></i> Also available as vignette ["Getting Started"](https://mlr3spatial.mlr-org.com/articles/meuse.html).
+
+```{r mlr3spatial-ex-3, warning=FALSE, results=FALSE}
+# set the output file and predict with the learner
+pred <- predict_spatial(task, learner, format = "stars")
+```
+
+```{r mlr3spatial-ex-31}
+pred
+```
+
+---
+
+## mlr3spatial
+
+```{r mlr3spatial-ex-4, out.width="50%", fig.align='center'}
+plot(pred, col = c("#440154FF", "#443A83FF", "#31688EFF",
+  "#21908CFF", "#35B779FF", "#8FD744FF", "#FDE725FF"))
+```
+
+---
+
+## mlr3spatial
+
+**Parallel predictions**
+
+Often spatial predictions take quite some time due to the amount of points to be predicted.
+Especially in the field of remote sensing this can be **millions** of points and more.
+
+While some spatial classes come with built-in parallelization, {mlr3} provides a more efficient and generalized methodology to speed up such large prediction tasks.
+
+<br>
+Check out this benchmark <i class="fas fa-hand-point-right"></i>
+
+.extrasmall[
+Source: https://mlr3spatial.mlr-org.com/articles/benchmark.html
+]
+
+---
+
+.fl.w-40[
+- 500 MB file on disk
+
+- ~ 25 Mio. values
+
+.small[
+- `demo_stack_spatraster(500)`
+]
+]
+
+.fl.w-60[
+![:scale 95%](https://mlr3spatial.mlr-org.com/articles/plot-benchmark-large-1.png)
+]
+
+---
+
+class: middle, inverse, center
+
+# 2.2 mlr3spatiotempcv
+
+---
+
+## mlr3spatiotempcv
+
+- Spatiotemporal resampling methods for {mlr3}
+
+- Aims to simplify/structure the jungle of spatiotemporal resampling methods
+
+<i class="fas fa-check" style="color:green;"></i>  Generic `ggplot2::autoplot()` for all methods
+
+- Upcoming paper (JSS)
+
+<i class="fas fa-check" style="color:green;"></i>  Currently wraps **8** resampling methods from **4** packages
+
+  - {blockCV}
+  - {sperrorest}
+  - {CAST}
+  - {skmeans}
+
+---
+
+## mlr3spatiotempcv
+
+Spatiotemporal performance estimations - Essentials
+
+<i class="fas fa-arrow-right", style="color:green"></i> Non-spatial resampling methods **overestimate** model performace due to **spatial autocorrelation** betweeen train and test data
+
+<i class="fas fa-exclamation", style="color:orange"></i> There is **no single best** method, the choice of the method should be **target-oriented** (what do I want to predict?)
+
+<i class="fas fa-question", style="color:grey"></i> There is a debate whether spatiotemporal resampling methods **might be too pessimistic**
+
+<br>
+<i class="fas fa-arrow-right"></i> Ongoing research <i class="far fa-lightbulb"></i>
+
+---
+
+## mlr3spatiotempcv
+
+Example: 
+
+- Spatial cross-validation with Random Forest <i class="fas fa-trees", style="color=green"></i>; 
+
+- Predicting **landslide** events (0/1) in Ecuador.
+
+```{r mlr3spatiotempcv-ex}
+library("mlr3spatiotempcv")
+
+# create 'sf' object from example data
+data_sf <- sf::st_as_sf(ecuador, coords = c("x", "y"), crs = 32717)
+```
+
+---
+
+## mlr3spatiotempcv
+
+```{r, echo=FALSE, out.width="100%", out.height="75%"}
+mapview::mapview(data_sf)
+```
+
+---
+
+## mlr3spatiotempcv
+
+```{r mlr3spatiotempcv-ex11}
+# create ClassifST task
+task <- TaskClassifST$new("ecuador_sf", backend = data_sf,
+  target = "slides", positive = "TRUE"
+)
+print(task)
+```
+
+---
+
+## mlr3spatiotempcv
+
+```{r mlr3spatiotempcv-ex2}
+library("mlr3learners")
+library("ranger")
+task <- tsk("ecuador")
+
+learner <- lrn("classif.ranger", predict_type = "prob")
+resampling_sp <- rsmp("repeated_spcv_coords",
+  folds = 4, repeats = 2
+)
+
+rr_sp <- resample(
+  task = task,
+  learner = learner,
+  resampling = resampling_sp
+)
+
+rr_sp$aggregate(measures = msr("classif.ce"))
+```
+
+---
+
+## mlr3spatiotempcv
+
+```{r mlr3spatiotempcv-ex3, fig.retina=1, dpi=150, fig.dim=c(8, 3)}
+autoplot(resampling_sp, task, fold_id = c(1:2), size = 0.7) *
+  ggplot2::scale_y_continuous(breaks = seq(-3.97, -4, -0.01)) *
+  ggplot2::scale_x_continuous(breaks = seq(-79.06, -79.08, -0.01))
+```
+
+---
+
+## mlr3spatiotempcv
+
+More resources
+
+- See the **"Spatiotemporal Analysis"** chapter in the mlr3book (https://mlr3book.mlr-org.com/special-tasks.html#spatiotemporal)
+
+- Function reference of {mlr3spatiotempcv}: https://mlr3spatiotempcv.mlr-org.com/reference/index.html
+
+- Literature: [Roberts et al. 2017](https://onlinelibrary.wiley.com/doi/10.1111/ecog.02881), [Schratz et al. 2019](http://www.sciencedirect.com/science/article/pii/S0304380019302145)
+
+---
+
+## mlr3spatiotempcv
+
+What about (spatio)-temporal methods?
+
+- Two methods (`"sptcv_cstf"` and `"sptcv_cluto"`) support both space and time
+
+- Spatiotemporal resampling is non-trivial due to the involvment of multiple dimensions
+
+- We would love to see help/contributions from the community for {mlr3temporal}
+
+---
+
+## Acknowledgements
+
+.fl.w-50.pa2[
+Thanks to **Marc Becker** for his help developing mlr3 spatial packages.
+
+Thanks to mlr-org's GitHub sponsors (especially **OpenGeoHub** and **cynkra**).
+
+Thanks to **you** for being interested in / using mlr3!
+]
+
+.fl.w-10.pl2[
+.extrasmall[Bernd Bischl]
+![:scale 100%](https://camo.githubusercontent.com/9fd1aabd77a967a07cc5b3c11f65e94da9eaad096c3763263d6a824c4b38aa93/68747470733a2f2f692e696d6775722e636f6d2f36654958794b362e6a7067)
+
+.extrasmall[Patrick Schratz]
+![:scale 100%](https://camo.githubusercontent.com/40abd6db52ba0cf7bce85bc6b38ce284e3e4fd660645b239f3ad58044ca90a5c/68747470733a2f2f692e696d6775722e636f6d2f58456e464a48332e6a7067)
+]
+
+.fl.w-10.pl2[
+.extrasmall[Michel Lang]
+![:scale 100%](https://camo.githubusercontent.com/139e8ea5bd5a06398296053eaa70a40c348d9d174bd9d019219910e93a168c01/68747470733a2f2f692e696d6775722e636f6d2f71514f6a7a78332e6a7067)
+
+.extrasmall[Flo Pfisterer]
+![:scale 100%](https://camo.githubusercontent.com/18bae7100efeab753766ca471a9585b60fd89ea18fcbc54c5df00be7b05ffb89/68747470733a2f2f692e696d6775722e636f6d2f7a765a6f5150702e6a7067)
+]
+
+.fl.w-10.pl2[
+.extrasmall[Lars Kothoff]
+![:scale 100%](https://camo.githubusercontent.com/4bd5b1d850548ef51d1d7b32911192ad452ad4f185e52d572d5a459a205cb551/68747470733a2f2f692e696d6775722e636f6d2f316c54316536562e6a7067)
+
+<p style="margin-bottom:2.08cm;">
+
+.extrasmall[Marc Becker]
+![:scale 100%](https://camo.githubusercontent.com/f19f02a86f9c9abdedad06f97cdf7d2115b1ba92ceb6faea539ddd88806dffba/68747470733a2f2f692e696d6775722e636f6d2f4a3873747072792e6a7067)
+]
+
+.fl.w-10.pl2[
+.extrasmall[Jakob Richter]
+![:scale 100%](https://camo.githubusercontent.com/fb90280e7a73229dac9a83802b06b1ef0a5355cef2dd02e6351b0341ee7cc72e/68747470733a2f2f692e696d6775722e636f6d2f7141693249777a2e6a7067)
+
+<p style="margin-bottom:1.35cm;">
+
+.extrasmall[L. Schneider]
+![:scale 100%](https://camo.githubusercontent.com/b9f624e213f3fb39094e171b60a5db3e3f21c42dc73c3492eef2703a96ba924a/68747470733a2f2f692e696d6775722e636f6d2f5736613374336c2e706e67)
+]
+
+.fl.w-10.pl2[
+.extrasmall[Martin Binder]
+![:scale 100%](https://avatars1.githubusercontent.com/u/15801081?s=150&v=4)
+
+<p style="margin-bottom:2.08cm;">
+
+.extrasmall[R. Sonabend]
+![:scale 100%](https://raw.githubusercontent.com/RaphaelS1/RaphaelS1/master/gh_img.jpeg)
+]
+
+```{r xaringan-logo, echo=FALSE}
+xaringanExtra::use_logo(
+  image_url = "assets/img/mlr.png",
+  # exclude_class = c("inverse", "hide_logo")
+  exclude_class = "hide_logo"
+)
+```
+
+```{r xaringan-extra, echo=FALSE}
+xaringanExtra::use_tile_view()
+xaringanExtra::use_broadcast()
+# xaringanExtra::use_webcam()
+xaringanExtra::use_freezeframe()
+xaringanExtra::use_animate_css()
+xaringanExtra::use_tachyons()
+xaringanExtra::use_panelset()
+xaringanExtra::use_search(show_icon = FALSE)
+xaringanExtra::use_progress_bar(color = "#0051BA", location = "top", height = "0.1em")
+xaringanExtra::use_fit_screen()
+xaringanExtra::use_extra_styles(
+  hover_code_line = TRUE,
+  mute_unhighlighted_code = TRUE
+)
+```
+
+```{r xaringanExtra-clipboard, echo=FALSE}
+htmltools::tagList(
+  xaringanExtra::use_clipboard(
+    button_text = "<i class=\"fa fa-clipboard\"></i>",
+    success_text = "<i class=\"fa fa-check\" style=\"color: #90BE6D\"></i>",
+    error_text = "<i class=\"fa fa-times-circle\" style=\"color: #F94144\"></i>"
+  ),
+  rmarkdown::html_dependency_font_awesome()
+)
+```
+
+```{r xaringan-options, echo=FALSE}
+xaringan_themer_css <- "assets/css/cynkra-xaringan.css"
+xaringanthemer::style_xaringan(
+  # text_color = "#002b3",
+  inverse_background_color = "#fff",
+  # inverse_text_color = "#002b3",
+  inverse_header_color = "#1f65b7",
+  title_slide_background_image = "../img/background-image.jpg",
+  title_slide_text_color = "white",
+  header_font_family = "frutiger-light",
+  header_font_weight = "500",
+  header_font_url = "fonts/frutiger.css",
+  text_font_family = "frutiger-light",
+  text_font_url = "fonts/frutiger.css",
+  text_font_size = "150%",
+  text_slide_number_color = "#1f65b7",
+  code_font_size = "65%",
+  code_inline_font_size = "80%",
+  link_color = "#1f65b7",
+  extra_css = list(
+    # "li" = list("padding" = "8px 0px 0px"),
+    ".small" = list("font-size" = "65%"),
+    ".extrasmall" = list("font-size" = "50%"),
+    ".panelset .panel-tabs" = list("font-size" = "50% !important"),
+    ".tiny pre code" = list("font-size" = "33%"),
+    # word wrapping
+    ".pre" = list("white-space" = "pre-wrap"),
+    ".left-code" = list("color" = "#777", "width" = "38%", "height" = "92%", "float" = "left"),
+    ".right-plot" = list("width" = "60%", "float" = "right", "padding-left" = "1%")
+  ),
+  extra_fonts = list(
+    # "frutiger-light",
+    "fonts/frutiger.css"
+  ),
+  outfile = xaringan_themer_css
+)
+```
+
+
+```{r create-pdf, eval=FALSE, echo=FALSE}
+# requires docker to be running
+# rstudioapi::jobRunScript(here::here("talks/2021-09-10-opendatascience-ws/assets/create-pdf.R"))
+```

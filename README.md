@@ -3,7 +3,7 @@
 
 ## 2021
 
-- [Zurich R User Group, October 27th 2021, Zurich, Switzerland](https://raw.githack.com/pat-s/presentations/2021-10/2021-10-zurich-R-user-group/2021-10-zurich.html)
+- [Zurich R User Group, October 27th 2021, Zurich, Switzerland](https://raw.githack.com/pat-s/presentations/2021-10-r1/2021-10-zurich-R-user-group/2021-10-zurich.html)
 
 - [OpenDataScience Europe, September 10th 2021, Wageningen, Netherlands](https://my.cynkra.com/connect/talks/opendatascience-eu-2021)
 

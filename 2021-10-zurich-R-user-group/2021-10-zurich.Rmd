@@ -117,7 +117,7 @@ https://gist.github.com/pat-s/ae290bd6dd8c2970c7aa0baf200483c4
 
 **Slides**
 
-https://my.cynkra.com/connect/talks/opendatascience-eu-2021/
+https://github.com/pat-s/presentations
 
 ---
 
